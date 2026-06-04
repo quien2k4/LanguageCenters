@@ -1,33 +1,131 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+@model LanguageCenter.Models.HomeViewModel
+
+@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
-
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+<section class="bg-primary text-white py-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-3">Learn languages with confidence</h1>
+                <p class="lead mb-4">
+                    Explore practical courses, upcoming classes, and experienced teachers at Language Center.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="#featured-programs" class="btn btn-light btn-lg">View Programs</a>
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-light btn-lg">Register Now</a>
+                </div>
+            </div>
+        </div>
     </div>
-</main>
+</section>
+
+<section id="featured-programs" class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Featured Programs</h2>
+                <p class="text-muted mb-0">Active programs available for new students.</p>
+            </div>
+        </div>
+
+        @if (Model.FeaturedPrograms.Any())
+        {
+            <div class="row g-4">
+                @foreach (var program in Model.FeaturedPrograms)
+                {
+                    var imageUrl = string.IsNullOrWhiteSpace(program.ImageURL)
+                        ? Url.Content("~/Content/Images/default-program.jpg")
+                        : Url.Content(program.ImageURL);
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img src="@imageUrl" class="card-img-top" alt="@program.ProgramName" style="height: 180px; object-fit: cover;" />
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">@program.ProgramName</h5>
+                                <p class="mb-1"><strong>Level:</strong> @(string.IsNullOrWhiteSpace(program.Level) ? "Updating" : program.Level)</p>
+                                <p class="mb-1"><strong>Duration:</strong> @(string.IsNullOrWhiteSpace(program.Duration) ? "Updating" : program.Duration)</p>
+                                <p class="mb-3"><strong>Fee:</strong> @program.Fee.ToString("N0")</p>
+                                <a href="#" class="btn btn-outline-primary mt-auto">View Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">No active programs available.</div>
+        }
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">New Classes</h2>
+            <p class="text-muted mb-0">Latest classes sorted by start date.</p>
+        </div>
+
+        @if (Model.NewClasses.Any())
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.NewClasses)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <span class="badge bg-primary mb-3">@(string.IsNullOrWhiteSpace(item.StatusName) ? "Updating" : item.StatusName)</span>
+                                <h5 class="card-title">@item.ClassName</h5>
+                                <p class="mb-1"><strong>Program:</strong> @(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</p>
+                                <p class="mb-1"><strong>Teacher:</strong> @(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</p>
+                                <p class="mb-0"><strong>Start:</strong> @(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">No classes available.</div>
+        }
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">Teachers</h2>
+            <p class="text-muted mb-0">Meet our teaching team.</p>
+        </div>
+
+        @if (Model.Teachers.Any())
+        {
+            <div class="row g-4">
+                @foreach (var teacher in Model.Teachers)
+                {
+                    var avatarUrl = string.IsNullOrWhiteSpace(teacher.Avatar)
+                        ? Url.Content("~/Content/Images/default-avatar.png")
+                        : Url.Content(teacher.Avatar);
+
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body p-4">
+                                <img src="@avatarUrl" alt="@teacher.FullName" class="rounded-circle mb-3" style="width: 110px; height: 110px; object-fit: cover;" />
+                                <h5 class="card-title mb-2">@teacher.FullName</h5>
+                                <p class="text-muted mb-0">@(string.IsNullOrWhiteSpace(teacher.Expertise) ? "Expertise updating" : teacher.Expertise)</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">No teachers available.</div>
+        }
+    </div>
+</section>

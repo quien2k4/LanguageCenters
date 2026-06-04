@@ -1,0 +1,129 @@
+﻿body {
+    margin: 0;
+    background-color: #f8fafc;
+    font-family: Arial, sans-serif;
+    color: #1e293b;
+}
+
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: #1e293b;
+    color: white;
+    padding: 20px 0;
+    flex-shrink: 0;
+}
+
+.admin-sidebar {
+    background-color: #111827;
+}
+
+.teacher-sidebar {
+    background-color: #0f172a;
+}
+
+.sidebar-logo {
+    font-size: 22px;
+    font-weight: bold;
+    padding: 0 20px 25px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0 0;
+}
+
+    .sidebar-menu li a {
+        display: block;
+        padding: 12px 22px;
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 15px;
+    }
+
+        .sidebar-menu li a:hover {
+            background-color: #334155;
+            color: white;
+        }
+
+.main-area {
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar {
+    height: 72px;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+    .topbar h4 {
+        margin: 0;
+        font-weight: bold;
+    }
+
+.content {
+    padding: 28px;
+}
+
+.user-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.avatar-small {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e5e7eb;
+}
+
+.card-box {
+    background-color: white;
+    border-radius: 14px;
+    padding: 22px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+}
+
+.table-box {
+    background-color: white;
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .dashboard-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .topbar {
+        height: auto;
+        padding: 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+}

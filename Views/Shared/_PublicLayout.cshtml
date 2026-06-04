@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Language Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/public.css" rel="stylesheet" />
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="@Url.Action("Index", "Home")">
+                Language Center
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Program")">Programs</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Create", "Consultation")">Consultation</a>
+                    </li>
+
+                    @if (Session["AccountID"] == null)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Login", "Account")">Login</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-lg-2" href="@Url.Action("Register", "Account")">
+                                Register
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Hello, @Session["FullName"]</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="btn btn-outline-danger ms-lg-2" href="@Url.Action("Logout", "Account")">
+                                Logout
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        @if (TempData["Success"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="footer-public mt-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2026 Language Center Website</p>
+        </div>
+    </footer>
+
+    <script src="~/Scripts/jquery-3.7.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

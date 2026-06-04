@@ -1,0 +1,88 @@
+﻿@{
+    var avatar = Session["Avatar"] == null || string.IsNullOrEmpty(Session["Avatar"].ToString())
+        ? Url.Content("~/Content/Images/default-avatar.png")
+        : Url.Content(Session["Avatar"].ToString());
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Student</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/dashboard.css" rel="stylesheet" />
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                Language Center
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="@Url.Action("Profile", "Student")">My Profile</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("RegisterClass", "Student")">Register Class</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("MyClasses", "Student")">My Classes</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Payments", "Student")">Payment</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("PlacementTests", "Student")">Placement Test</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Consultation", "Student")">Consultation</a>
+                </li>
+                <li>
+                    <a href="@Url.Action("Logout", "Account")">Logout</a>
+                </li>
+            </ul>
+        </aside>
+
+        <div class="main-area">
+
+            <header class="topbar">
+                <h4>@ViewBag.Title</h4>
+
+                <div class="user-box">
+                    <img src="@avatar" class="avatar-small" />
+                    <span>@Session["FullName"]</span>
+                </div>
+            </header>
+
+            <section class="content">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["Success"]
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["Error"]
+                    </div>
+                }
+
+                @RenderBody()
+            </section>
+
+        </div>
+    </div>
+
+    <script src="~/Scripts/jquery-3.7.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

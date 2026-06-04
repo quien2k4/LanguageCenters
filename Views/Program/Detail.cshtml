@@ -1,0 +1,117 @@
+@model LanguageCenter.Models.ProgramDetailViewModel
+
+@{
+    ViewBag.Title = Model.ProgramName;
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageURL)
+        ? Url.Content("~/Content/Images/default-program.jpg")
+        : Url.Content(Model.ImageURL);
+}
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-5">
+                <img src="@imageUrl" alt="@Model.ProgramName" class="img-fluid rounded shadow-sm w-100" style="max-height: 360px; object-fit: cover;" />
+            </div>
+            <div class="col-lg-7">
+                <h1 class="fw-bold mb-3">@Model.ProgramName</h1>
+                <p class="text-muted mb-4">
+                    @(string.IsNullOrWhiteSpace(Model.Description) ? "Description is updating." : Model.Description)
+                </p>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="bg-white border rounded p-3 h-100">
+                            <div class="text-muted small">Level</div>
+                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Level) ? "Updating" : Model.Level)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-white border rounded p-3 h-100">
+                            <div class="text-muted small">Duration</div>
+                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Duration) ? "Updating" : Model.Duration)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-white border rounded p-3 h-100">
+                            <div class="text-muted small">Fee</div>
+                            <div class="fw-semibold">@Model.Fee.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5 class="fw-bold">Output Standard</h5>
+                    <p class="mb-0">@(string.IsNullOrWhiteSpace(Model.OutputStandard) ? "Output standard is updating." : Model.OutputStandard)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Related Classes</h2>
+                <p class="text-muted mb-0">Classes currently connected to this program.</p>
+            </div>
+            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary">Back to Programs</a>
+        </div>
+
+        @if (Model.RelatedClasses.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Teacher</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.RelatedClasses)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.ClassName</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.StatusName) ? "Updating" : item.StatusName)</td>
+                                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</td>
+                                <td class="text-end">
+                                    @if (Session["AccountID"] == null)
+                                    {
+                                        <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm">Register</a>
+                                    }
+                                    else if (Model.CurrentRole == "Student")
+                                    {
+                                        <a href="@Url.Action("RegisterClass", "Student", new { classId = item.ClassID })" class="btn btn-primary btn-sm">Register</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Not available</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">No classes available for this program.</div>
+        }
+
+        @if (Session["AccountID"] != null && (Model.CurrentRole == "Admin" || Model.CurrentRole == "Teacher"))
+        {
+            <div class="alert alert-warning mt-4 mb-0">
+                Admin and Teacher accounts cannot register for classes.
+            </div>
+        }
+    </div>
+</section>

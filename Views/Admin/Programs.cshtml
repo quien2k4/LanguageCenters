@@ -1,0 +1,139 @@
+@model LanguageCenter.Models.AdminProgramPageViewModel
+
+@{
+    ViewBag.Title = "Manage Programs";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Manage Programs</h2>
+            <p class="text-muted mb-0">Create, update, and deactivate language programs.</p>
+        </div>
+        <a href="@Url.Action("CreateProgram", "Admin")" class="btn btn-primary">Create Program</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            @using (Html.BeginForm("Programs", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Program name" />
+                </div>
+                <div class="col-md-3">
+                    <label for="level" class="form-label">Level</label>
+                    <select id="level" name="level" class="form-select">
+                        <option value="">All levels</option>
+                        @foreach (var item in Model.Levels)
+                        {
+                            <option value="@item" @(Model.Level == item ? "selected" : "")>@item</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="All" @(Model.Status == "All" ? "selected" : "")>All</option>
+                        <option value="Active" @(Model.Status == "Active" ? "selected" : "")>Active</option>
+                        <option value="Inactive" @(Model.Status == "Inactive" ? "selected" : "")>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            @if (Model.Programs.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Program ID</th>
+                                <th>Image</th>
+                                <th>Program Name</th>
+                                <th>Level</th>
+                                <th>Duration</th>
+                                <th>Fee</th>
+                                <th>Active</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Programs)
+                            {
+                                var imageUrl = string.IsNullOrWhiteSpace(item.ImageURL)
+                                    ? Url.Content("~/Content/Images/default-program.jpg")
+                                    : Url.Content(item.ImageURL);
+
+                                <tr>
+                                    <td>@item.ProgramID</td>
+                                    <td>
+                                        <img src="@imageUrl" alt="@item.ProgramName" class="rounded" style="width: 84px; height: 56px; object-fit: cover;" />
+                                    </td>
+                                    <td class="fw-semibold">@item.ProgramName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Updating" : item.Level)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Duration) ? "Updating" : item.Duration)</td>
+                                    <td>@item.Fee.ToString("N0")</td>
+                                    <td>
+                                        <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
+                                            @(item.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="@Url.Action("EditProgram", "Admin", new { id = item.ProgramID })" class="btn btn-sm btn-outline-primary">Edit</a>
+                                            <a href="@Url.Action("DeleteProgram", "Admin", new { id = item.ProgramID })" class="btn btn-sm btn-outline-danger">Delete</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                if (Model.TotalPages > 1)
+                {
+                    <nav class="p-3" aria-label="Program pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = Model.CurrentPage - 1 })">Previous</a>
+                            </li>
+                            @for (var i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = i })">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = Model.CurrentPage + 1 })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">No programs found.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

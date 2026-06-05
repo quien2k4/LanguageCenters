@@ -1,0 +1,59 @@
+@model LanguageCenter.Models.AdminClassViewModel
+
+@{
+    ViewBag.Title = "Change Class Status";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Change Class Status</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        This will not delete the class. The system will change its status to Cancelled or Closed.
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-muted small">Class</div>
+                                <div class="fw-semibold">@Model.ClassName</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-muted small">Program</div>
+                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ProgramName) ? "Updating" : Model.ProgramName)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-muted small">Teacher</div>
+                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.TeacherName) ? "Updating" : Model.TeacherName)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="text-muted small">Current Status</div>
+                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.StatusName) ? "Updating" : Model.StatusName)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @using (Html.BeginForm("ConfirmDeleteClass", "Admin", new { id = Model.ClassID }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">Change Status</button>
+                            <a href="@Url.Action("Classes", "Admin")" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+@model LanguageCenter.Models.AdminProgramViewModel
+
+@{
+    ViewBag.Title = "Edit Program";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageURL)
+        ? Url.Content("~/Content/Images/default-program.jpg")
+        : Url.Content(Model.ImageURL);
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Program</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    @using (Html.BeginForm("EditProgram", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.ProgramID)
+                        @Html.HiddenFor(model => model.ImageURL)
+
+                        <div class="mb-4">
+                            <img src="@imageUrl" alt="@Model.ProgramName" class="rounded border" style="width: 180px; height: 120px; object-fit: cover;" />
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.ProgramName, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.ProgramName, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.ProgramName, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.Level, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Level, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Level, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3">
+                                @Html.LabelFor(model => model.Duration, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Duration, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Duration, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-4">
+                                @Html.LabelFor(model => model.Fee, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Fee, new { @class = "form-control", type = "number", min = "0", step = "1000" })
+                                @Html.ValidationMessageFor(model => model.Fee, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-4">
+                                <label for="imageFile" class="form-label">New Image Upload</label>
+                                <input type="file" id="imageFile" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" })
+                                    @Html.LabelFor(model => model.IsActive, new { @class = "form-check-label" })
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                @Html.LabelFor(model => model.Description, new { @class = "form-label" })
+                                @Html.TextAreaFor(model => model.Description, 4, 40, new { @class = "form-control" })
+                            </div>
+                            <div class="col-12">
+                                @Html.LabelFor(model => model.OutputStandard, new { @class = "form-label" })
+                                @Html.TextAreaFor(model => model.OutputStandard, 3, 40, new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Back to Programs</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

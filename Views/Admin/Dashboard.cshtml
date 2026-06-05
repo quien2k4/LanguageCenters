@@ -1,34 +1,248 @@
+@model LanguageCenter.Models.AdminDashboardViewModel
+
 @{
     ViewBag.Title = "Admin Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container py-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">Admin Dashboard</h4>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Admin Dashboard</h2>
+            <p class="text-muted mb-0">Welcome, @Model.FullName</p>
         </div>
-        <div class="card-body">
-            <p class="text-muted mb-4">Welcome to the temporary admin test page.</p>
+        <div class="text-muted small">Account ID: @Model.AccountID</div>
+    </div>
 
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Full Name</div>
-                        <div class="fw-semibold">@ViewBag.FullName</div>
-                    </div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Programs</div>
+                    <div class="display-6 fw-bold">@Model.TotalPrograms</div>
                 </div>
-                <div class="col-md-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Role</div>
-                        <div class="fw-semibold">@ViewBag.Role</div>
-                    </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Classes</div>
+                    <div class="display-6 fw-bold">@Model.TotalClasses</div>
                 </div>
-                <div class="col-md-4">
-                    <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Account ID</div>
-                        <div class="fw-semibold">@ViewBag.AccountID</div>
-                    </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Students</div>
+                    <div class="display-6 fw-bold">@Model.TotalStudents</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Teachers</div>
+                    <div class="display-6 fw-bold">@Model.TotalTeachers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Registrations</div>
+                    <div class="display-6 fw-bold">@Model.TotalRegistrations</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Payments</div>
+                    <div class="display-6 fw-bold">@Model.TotalPayments</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Placement Tests</div>
+                    <div class="display-6 fw-bold">@Model.TotalPlacementTests</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Consultations</div>
+                    <div class="display-6 fw-bold">@Model.TotalConsultations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Revenue</div>
+                    <div class="h2 fw-bold mb-0">@Model.TotalRevenue.ToString("N0")</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Paid Payments</div>
+                    <div class="h2 fw-bold mb-0">@Model.PaidPayments</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Unpaid Payments</div>
+                    <div class="h2 fw-bold mb-0">@Model.UnpaidPayments</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Recent Registrations</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.RecentRegistrations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Class</th>
+                                <th>Program</th>
+                                <th>Registration Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.RecentRegistrations)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Unknown student" : item.StudentName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ClassName) ? "Updating" : item.ClassName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</td>
+                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
+                                    <td><span class="badge bg-info text-dark">@(string.IsNullOrWhiteSpace(item.RegStatus) ? "Updating" : item.RegStatus)</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">No recent registrations available.</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Payments</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentPayments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Payment Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.RecentPayments)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Unknown student" : item.StudentName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(item.ClassName) ? "Updating" : item.ClassName)</td>
+                                            <td>@item.Amount.ToString("N0")</td>
+                                            <td><span class="badge @(item.PaymentStatus == "Paid" ? "bg-success" : item.PaymentStatus == "Unpaid" ? "bg-warning text-dark" : "bg-secondary")">@(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "Updating" : item.PaymentStatus)</span></td>
+                                            <td>@(item.PaymentDate.HasValue ? item.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4">
+                            <div class="alert alert-info mb-0">No recent payments available.</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Consultations</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentConsultations.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Guest</th>
+                                        <th>Contact</th>
+                                        <th>Question</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.RecentConsultations)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@item.GuestName</td>
+                                            <td>@item.ContactInformation</td>
+                                            <td style="min-width: 240px;">@item.QuestionContent</td>
+                                            <td><span class="badge bg-warning text-dark">@(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Pending" : item.RequestStatus)</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4">
+                            <div class="alert alert-info mb-0">No recent consultations available.</div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

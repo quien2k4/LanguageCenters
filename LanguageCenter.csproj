@@ -136,6 +136,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LanguageCenter.dbml</DependentUpon>
     </Compile>
+    <Compile Include="Models\AdminDashboardViewModel.cs" />
+    <Compile Include="Models\AdminClassFormViewModel.cs" />
+    <Compile Include="Models\AdminClassPageViewModel.cs" />
+    <Compile Include="Models\AdminClassViewModel.cs" />
+    <Compile Include="Models\AdminProgramPageViewModel.cs" />
+    <Compile Include="Models\AdminProgramViewModel.cs" />
     <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\ProgramDetailViewModel.cs" />
     <Compile Include="Models\ProgramListViewModel.cs" />
@@ -227,6 +233,14 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
+    <Content Include="Views\Admin\Programs.cshtml" />
+    <Content Include="Views\Admin\CreateProgram.cshtml" />
+    <Content Include="Views\Admin\EditProgram.cshtml" />
+    <Content Include="Views\Admin\DeleteProgram.cshtml" />
+    <Content Include="Views\Admin\Classes.cshtml" />
+    <Content Include="Views\Admin\CreateClass.cshtml" />
+    <Content Include="Views\Admin\EditClass.cshtml" />
+    <Content Include="Views\Admin\DeleteClass.cshtml" />
     <Content Include="Views\Teacher\Dashboard.cshtml" />
     <Content Include="Views\Teacher\ClassStudents.cshtml" />
     <Content Include="Views\Teacher\Materials.cshtml" />

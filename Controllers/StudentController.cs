@@ -325,6 +325,233 @@ namespace LanguageCenter.Controllers
             return RedirectToAction("Payments", "Student");
         }
 
+        public ActionResult PlacementTests()
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var tests = db.PLACEMENT_TESTs
+                    .Where(x => x.StudentID == student.StudentID)
+                    .OrderByDescending(x => x.TestDate)
+                    .ThenByDescending(x => x.TestTime)
+                    .Select(x => new StudentPlacementTestViewModel
+                    {
+                        TestID = x.TestID,
+                        TestDate = x.TestDate,
+                        TestTime = x.TestTime,
+                        Level = x.Level,
+                        ResultScore = x.ResultScore,
+                        Status = x.Status
+                    })
+                    .ToList();
+
+                var model = new StudentPlacementTestsViewModel
+                {
+                    PlacementTests = tests
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult CreatePlacementTest()
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            return View(new CreatePlacementTestViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreatePlacementTest(CreatePlacementTestViewModel model)
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            TimeSpan testTime;
+            if (!TimeSpan.TryParse(model.TestTime, out testTime))
+            {
+                ModelState.AddModelError("TestTime", "TestTime is invalid.");
+            }
+
+            if (model.TestDate.HasValue && model.TestDate.Value.Date < DateTime.Today)
+            {
+                ModelState.AddModelError("TestDate", "TestDate cannot be earlier than today.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please check placement test information.";
+                return View(model);
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var placementTest = new PLACEMENT_TEST
+                {
+                    StudentID = student.StudentID,
+                    TestDate = model.TestDate.Value.Date,
+                    TestTime = testTime,
+                    Level = model.Level,
+                    ResultScore = null,
+                    Status = "Pending"
+                };
+
+                db.PLACEMENT_TESTs.InsertOnSubmit(placementTest);
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Placement test registered successfully.";
+            return RedirectToAction("PlacementTests", "Student");
+        }
+
+        public ActionResult Consultation()
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var account = GetCurrentAccount(db);
+                var fullName = student.FullName ?? string.Empty;
+                var phoneNumber = student.PhoneNumber ?? string.Empty;
+                var email = account != null ? account.Email ?? string.Empty : string.Empty;
+
+                var consultations = db.CONSULTATIONs
+                    .Where(x =>
+                        x.GuestName == fullName ||
+                        x.ContactInformation == phoneNumber ||
+                        x.ContactInformation == email)
+                    .OrderByDescending(x => x.ConsultationID)
+                    .Select(x => new StudentConsultationViewModel
+                    {
+                        ConsultationID = x.ConsultationID,
+                        GuestName = x.GuestName,
+                        ContactInformation = x.ContactInformation,
+                        QuestionContent = x.QuestionContent,
+                        RequestStatus = x.RequestStatus
+                    })
+                    .ToList();
+
+                var model = new StudentConsultationsViewModel
+                {
+                    Consultations = consultations
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult CreateConsultation()
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var account = GetCurrentAccount(db);
+                var defaultContact = !string.IsNullOrWhiteSpace(student.PhoneNumber)
+                    ? student.PhoneNumber
+                    : account != null ? account.Email : string.Empty;
+
+                var model = new CreateConsultationViewModel
+                {
+                    ContactInformation = defaultContact
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateConsultation(CreateConsultationViewModel model)
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please enter contact information and question content.";
+                return View(model);
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var consultation = new CONSULTATION
+                {
+                    GuestName = student.FullName ?? string.Empty,
+                    ContactInformation = (model.ContactInformation ?? string.Empty).Trim(),
+                    QuestionContent = (model.QuestionContent ?? string.Empty).Trim(),
+                    RequestStatus = "Pending"
+                };
+
+                db.CONSULTATIONs.InsertOnSubmit(consultation);
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Consultation request sent successfully.";
+            return RedirectToAction("Consultation", "Student");
+        }
+
         private ActionResult CheckStudentPermission()
         {
             if (Session["AccountID"] == null || Session["Role"] == null)
@@ -350,6 +577,17 @@ namespace LanguageCenter.Controllers
             }
 
             return db.STUDENTs.FirstOrDefault(s => s.AccountID == accountId);
+        }
+
+        private USER_ACCOUNT GetCurrentAccount(LanguageCenterDataContext db)
+        {
+            int accountId;
+            if (Session["AccountID"] == null || !int.TryParse(Session["AccountID"].ToString(), out accountId))
+            {
+                return null;
+            }
+
+            return db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == accountId);
         }
 
         private StudentRegisterClassViewModel GetClassInfo(LanguageCenterDataContext db, int classId)

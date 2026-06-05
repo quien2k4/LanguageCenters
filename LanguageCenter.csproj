@@ -144,6 +144,7 @@
     <Compile Include="Models\StudentPlacementTestViewModel.cs" />
     <Compile Include="Models\StudentConsultationViewModel.cs" />
     <Compile Include="Models\StudentRegisterClassViewModel.cs" />
+    <Compile Include="Models\TeacherDashboardViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

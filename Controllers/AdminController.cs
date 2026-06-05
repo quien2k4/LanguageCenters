@@ -2155,6 +2155,157 @@ namespace LanguageCenter.Controllers
             model.PhoneNumber = detail.PhoneNumber;
         }
 
+        public ActionResult Consultations(string search, string status, int page = 1)
+        {
+            const int pageSize = 10;
+
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            search = (search ?? string.Empty).Trim();
+            status = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var query = db.CONSULTATIONs.Select(c => new AdminConsultationViewModel
+                {
+                    ConsultationID = c.ConsultationID,
+                    GuestName = c.GuestName,
+                    ContactInformation = c.ContactInformation,
+                    QuestionContent = c.QuestionContent,
+                    RequestStatus = c.RequestStatus
+                });
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(c =>
+                        c.GuestName.Contains(search)
+                        || c.ContactInformation.Contains(search)
+                        || c.QuestionContent.Contains(search));
+                }
+
+                if (status != "All")
+                {
+                    query = query.Where(c => c.RequestStatus == status);
+                }
+
+                var totalItems = query.Count();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < 1)
+                {
+                    totalPages = 1;
+                }
+
+                if (page > totalPages)
+                {
+                    page = totalPages;
+                }
+
+                var consultations = query
+                    .OrderByDescending(c => c.ConsultationID)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new AdminConsultationPageViewModel
+                {
+                    Consultations = consultations,
+                    Search = search,
+                    Status = status,
+                    CurrentPage = page,
+                    TotalPages = totalPages,
+                    TotalConsultations = db.CONSULTATIONs.Count(),
+                    PendingConsultations = db.CONSULTATIONs.Count(c => c.RequestStatus == "Pending"),
+                    ProcessingConsultations = db.CONSULTATIONs.Count(c => c.RequestStatus == "Processing"),
+                    CompletedConsultations = db.CONSULTATIONs.Count(c => c.RequestStatus == "Completed"),
+                    CancelledConsultations = db.CONSULTATIONs.Count(c => c.RequestStatus == "Cancelled")
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult EditConsultation(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var consultation = db.CONSULTATIONs.FirstOrDefault(c => c.ConsultationID == id);
+                if (consultation == null)
+                {
+                    TempData["Error"] = "Consultation not found.";
+                    return RedirectToAction("Consultations", "Admin");
+                }
+
+                var model = new AdminConsultationFormViewModel
+                {
+                    ConsultationID = consultation.ConsultationID,
+                    GuestName = consultation.GuestName,
+                    ContactInformation = consultation.ContactInformation,
+                    QuestionContent = consultation.QuestionContent,
+                    RequestStatus = consultation.RequestStatus
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditConsultation(AdminConsultationFormViewModel model)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            var allowedStatuses = new[] { "Pending", "Processing", "Completed", "Cancelled" };
+            if (string.IsNullOrWhiteSpace(model.RequestStatus) || !allowedStatuses.Contains(model.RequestStatus))
+            {
+                ModelState.AddModelError("RequestStatus", "Request status is invalid.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var consultation = db.CONSULTATIONs.FirstOrDefault(c => c.ConsultationID == model.ConsultationID);
+                if (consultation == null)
+                {
+                    TempData["Error"] = "Consultation not found.";
+                    return RedirectToAction("Consultations", "Admin");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    model.GuestName = consultation.GuestName;
+                    model.ContactInformation = consultation.ContactInformation;
+                    model.QuestionContent = consultation.QuestionContent;
+                    TempData["Error"] = "Please check consultation status.";
+                    return View(model);
+                }
+
+                consultation.RequestStatus = model.RequestStatus;
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Consultation status updated successfully.";
+            return RedirectToAction("Consultations", "Admin");
+        }
+
         private ActionResult CheckAdminPermission()
         {
             if (Session["AccountID"] == null || Session["Role"] == null)

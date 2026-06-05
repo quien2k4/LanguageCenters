@@ -145,6 +145,9 @@
     <Compile Include="Models\AdminPaymentFormViewModel.cs" />
     <Compile Include="Models\AdminPaymentPageViewModel.cs" />
     <Compile Include="Models\AdminPaymentViewModel.cs" />
+    <Compile Include="Models\AdminConsultationFormViewModel.cs" />
+    <Compile Include="Models\AdminConsultationPageViewModel.cs" />
+    <Compile Include="Models\AdminConsultationViewModel.cs" />
     <Compile Include="Models\AdminPlacementTestFormViewModel.cs" />
     <Compile Include="Models\AdminPlacementTestPageViewModel.cs" />
     <Compile Include="Models\AdminPlacementTestViewModel.cs" />
@@ -270,6 +273,8 @@
     <Content Include="Views\Admin\EditPayment.cshtml" />
     <Content Include="Views\Admin\PlacementTests.cshtml" />
     <Content Include="Views\Admin\EditPlacementTest.cshtml" />
+    <Content Include="Views\Admin\Consultations.cshtml" />
+    <Content Include="Views\Admin\EditConsultation.cshtml" />
     <Content Include="Views\Teacher\Dashboard.cshtml" />
     <Content Include="Views\Teacher\ClassStudents.cshtml" />
     <Content Include="Views\Teacher\Materials.cshtml" />

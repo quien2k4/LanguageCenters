@@ -1,0 +1,148 @@
+@model LanguageCenter.Models.AdminConsultationPageViewModel
+
+@{
+    ViewBag.Title = "Manage Consultations";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Manage Consultations</h2>
+        <p class="text-muted mb-0">Review student consultation requests and update request status.</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Total Consultations</div>
+                    <h4 class="mb-0">@Model.TotalConsultations</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Pending</div>
+                    <h4 class="mb-0">@Model.PendingConsultations</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Processing</div>
+                    <h4 class="mb-0">@Model.ProcessingConsultations</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Completed</div>
+                    <h4 class="mb-0">@Model.CompletedConsultations</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Cancelled</div>
+                    <h4 class="mb-0">@Model.CancelledConsultations</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            @using (Html.BeginForm("Consultations", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-md-7">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Guest name, contact, question content" />
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Request Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="All" @(Model.Status == "All" ? "selected" : "")>All</option>
+                        <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</option>
+                        <option value="Processing" @(Model.Status == "Processing" ? "selected" : "")>Processing</option>
+                        <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Completed</option>
+                        <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            @if (Model.Consultations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Consultation ID</th>
+                                <th>Guest Name</th>
+                                <th>Contact</th>
+                                <th>Question Content</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Consultations)
+                            {
+                                <tr>
+                                    <td>@item.ConsultationID</td>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.GuestName) ? "Updating" : item.GuestName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ContactInformation) ? "Updating" : item.ContactInformation)</td>
+                                    <td style="max-width: 420px; white-space: normal;">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "No question" : item.QuestionContent)</td>
+                                    <td>
+                                        <span class="badge @(item.RequestStatus == "Completed" ? "bg-success" : item.RequestStatus == "Cancelled" ? "bg-danger" : item.RequestStatus == "Processing" ? "bg-info" : "bg-warning text-dark")">
+                                            @(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Updating" : item.RequestStatus)
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="@Url.Action("EditConsultation", "Admin", new { id = item.ConsultationID })" class="btn btn-sm btn-outline-primary">Edit Status</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                if (Model.TotalPages > 1)
+                {
+                    <nav class="p-3" aria-label="Consultation pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage - 1 })">Previous</a>
+                            </li>
+                            @for (var i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = i })">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage + 1 })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">No consultations found.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

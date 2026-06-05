@@ -1,0 +1,130 @@
+@model LanguageCenter.Models.AdminRegistrationPageViewModel
+
+@{
+    ViewBag.Title = "Manage Registrations";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Manage Registrations</h2>
+            <p class="text-muted mb-0">Review student registrations and update registration status.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            @using (Html.BeginForm("Registrations", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-lg-4 col-md-6">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Student, email, class, program" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="regStatus" class="form-label">Registration Status</label>
+                    <select id="regStatus" name="regStatus" class="form-select">
+                        <option value="All" @(Model.RegStatus == "All" ? "selected" : "")>All</option>
+                        <option value="Pending" @(Model.RegStatus == "Pending" ? "selected" : "")>Pending</option>
+                        <option value="Approved" @(Model.RegStatus == "Approved" ? "selected" : "")>Approved</option>
+                        <option value="Cancelled" @(Model.RegStatus == "Cancelled" ? "selected" : "")>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="paymentStatus" class="form-label">Payment Status</label>
+                    <select id="paymentStatus" name="paymentStatus" class="form-select">
+                        <option value="All" @(Model.PaymentStatus == "All" ? "selected" : "")>All</option>
+                        <option value="Unpaid" @(Model.PaymentStatus == "Unpaid" ? "selected" : "")>Unpaid</option>
+                        <option value="Paid" @(Model.PaymentStatus == "Paid" ? "selected" : "")>Paid</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            @if (Model.Registrations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Class</th>
+                                <th>Program</th>
+                                <th>Teacher</th>
+                                <th>Registration Date</th>
+                                <th>Reg Status</th>
+                                <th>Payment</th>
+                                <th>Amount</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Registrations)
+                            {
+                                <tr>
+                                    <td>@item.RegistrationID</td>
+                                    <td class="fw-semibold">@item.StudentName</td>
+                                    <td>@item.StudentEmail</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Updating" : item.PhoneNumber)</td>
+                                    <td>@item.ClassName</td>
+                                    <td>@item.ProgramName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</td>
+                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
+                                    <td>
+                                        <span class="badge @(item.RegStatus == "Approved" ? "bg-success" : item.RegStatus == "Cancelled" ? "bg-danger" : "bg-warning text-dark")">
+                                            @(string.IsNullOrWhiteSpace(item.RegStatus) ? "Updating" : item.RegStatus)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(item.PaymentStatus == "Paid" ? "bg-success" : item.PaymentStatus == "Unpaid" ? "bg-secondary" : "bg-light text-dark")">
+                                            @(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "No payment" : item.PaymentStatus)
+                                        </span>
+                                    </td>
+                                    <td>@(item.Amount.HasValue ? item.Amount.Value.ToString("N0") : "-")</td>
+                                    <td class="text-end">
+                                        <a href="@Url.Action("EditRegistration", "Admin", new { id = item.RegistrationID })" class="btn btn-sm btn-outline-primary">Edit Status</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                if (Model.TotalPages > 1)
+                {
+                    <nav class="p-3" aria-label="Registration pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Registrations", "Admin", new { search = Model.Search, regStatus = Model.RegStatus, paymentStatus = Model.PaymentStatus, page = Model.CurrentPage - 1 })">Previous</a>
+                            </li>
+                            @for (var i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Registrations", "Admin", new { search = Model.Search, regStatus = Model.RegStatus, paymentStatus = Model.PaymentStatus, page = i })">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Registrations", "Admin", new { search = Model.Search, regStatus = Model.RegStatus, paymentStatus = Model.PaymentStatus, page = Model.CurrentPage + 1 })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">No registrations found.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

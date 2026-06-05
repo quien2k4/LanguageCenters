@@ -1087,6 +1087,1074 @@ namespace LanguageCenter.Controllers
             return RedirectToAction("Teachers", "Admin");
         }
 
+        public ActionResult Students(string search, string status, int page = 1)
+        {
+            const int pageSize = 10;
+
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            search = (search ?? string.Empty).Trim();
+            status = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var query =
+                    from student in db.STUDENTs
+                    join account in db.USER_ACCOUNTs on student.AccountID equals account.AccountID
+                    select new AdminStudentViewModel
+                    {
+                        StudentID = student.StudentID,
+                        AccountID = student.AccountID,
+                        Avatar = account.Avatar,
+                        FullName = student.FullName,
+                        Email = account.Email,
+                        DateOfBirth = student.DateOfBirth,
+                        PhoneNumber = student.PhoneNumber,
+                        IsActive = account.IsActive == true,
+                        RegistrationCount = db.REGISTRATIONs.Count(r => r.StudentID == student.StudentID),
+                        PaymentCount = (
+                            from payment in db.PAYMENTs
+                            join registration in db.REGISTRATIONs on payment.RegistrationID equals registration.RegistrationID
+                            where registration.StudentID == student.StudentID
+                            select payment.PaymentID).Count(),
+                        PlacementTestCount = db.PLACEMENT_TESTs.Count(t => t.StudentID == student.StudentID)
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(s =>
+                        s.FullName.Contains(search)
+                        || s.Email.Contains(search)
+                        || (s.PhoneNumber != null && s.PhoneNumber.Contains(search)));
+                }
+
+                if (status == "Active")
+                {
+                    query = query.Where(s => s.IsActive);
+                }
+                else if (status == "Inactive")
+                {
+                    query = query.Where(s => !s.IsActive);
+                }
+
+                var totalItems = query.Count();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < 1)
+                {
+                    totalPages = 1;
+                }
+
+                if (page > totalPages)
+                {
+                    page = totalPages;
+                }
+
+                var students = query
+                    .OrderBy(s => s.FullName)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new AdminStudentPageViewModel
+                {
+                    Students = students,
+                    Search = search,
+                    Status = status,
+                    CurrentPage = page,
+                    TotalPages = totalPages
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult CreateStudent()
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            return View(new AdminStudentFormViewModel { IsActive = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateStudent(AdminStudentFormViewModel model, HttpPostedFileBase avatarFile)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError("Password", "Password is required.");
+            }
+
+            if (model.Password != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "ConfirmPassword must match Password.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var email = (model.Email ?? string.Empty).Trim();
+                if (db.USER_ACCOUNTs.Any(a => a.Email == email))
+                {
+                    ModelState.AddModelError("Email", "Email already exists.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Please check student information.";
+                    return View(model);
+                }
+
+                var avatarUrl = SaveAvatarImage(avatarFile);
+                if (avatarFile != null && avatarFile.ContentLength > 0 && avatarUrl == null)
+                {
+                    TempData["Error"] = "Invalid avatar type. Please upload jpg, jpeg, png, gif, or webp.";
+                    return View(model);
+                }
+
+                var account = new USER_ACCOUNT
+                {
+                    Email = email,
+                    PasswordHash = model.Password,
+                    Role = "Student",
+                    Avatar = avatarUrl,
+                    IsActive = model.IsActive,
+                    FailedLoginAttempts = 0,
+                    IsLockedOut = false
+                };
+
+                db.USER_ACCOUNTs.InsertOnSubmit(account);
+                db.SubmitChanges();
+
+                var student = new STUDENT
+                {
+                    AccountID = account.AccountID,
+                    FullName = (model.FullName ?? string.Empty).Trim(),
+                    DateOfBirth = model.DateOfBirth,
+                    PhoneNumber = (model.PhoneNumber ?? string.Empty).Trim()
+                };
+
+                db.STUDENTs.InsertOnSubmit(student);
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Student created successfully.";
+            return RedirectToAction("Students", "Admin");
+        }
+
+        [HttpGet]
+        public ActionResult EditStudent(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = db.STUDENTs.FirstOrDefault(s => s.StudentID == id);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == student.AccountID);
+                if (account == null)
+                {
+                    TempData["Error"] = "Student account not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                var model = new AdminStudentFormViewModel
+                {
+                    StudentID = student.StudentID,
+                    AccountID = student.AccountID,
+                    Email = account.Email,
+                    FullName = student.FullName,
+                    DateOfBirth = student.DateOfBirth,
+                    PhoneNumber = student.PhoneNumber,
+                    Avatar = account.Avatar,
+                    IsActive = account.IsActive == true
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditStudent(AdminStudentFormViewModel model, HttpPostedFileBase avatarFile)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = db.STUDENTs.FirstOrDefault(s => s.StudentID == model.StudentID);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == student.AccountID);
+                if (account == null)
+                {
+                    TempData["Error"] = "Student account not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                var email = (model.Email ?? string.Empty).Trim();
+                if (db.USER_ACCOUNTs.Any(a => a.Email == email && a.AccountID != account.AccountID))
+                {
+                    ModelState.AddModelError("Email", "Email already exists.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Please check student information.";
+                    model.Avatar = account.Avatar;
+                    return View(model);
+                }
+
+                var avatarUrl = SaveAvatarImage(avatarFile);
+                if (avatarFile != null && avatarFile.ContentLength > 0 && avatarUrl == null)
+                {
+                    TempData["Error"] = "Invalid avatar type. Please upload jpg, jpeg, png, gif, or webp.";
+                    model.Avatar = account.Avatar;
+                    return View(model);
+                }
+
+                account.Email = email;
+                account.IsActive = model.IsActive;
+                if (!string.IsNullOrWhiteSpace(avatarUrl))
+                {
+                    account.Avatar = avatarUrl;
+                }
+
+                student.FullName = (model.FullName ?? string.Empty).Trim();
+                student.DateOfBirth = model.DateOfBirth;
+                student.PhoneNumber = (model.PhoneNumber ?? string.Empty).Trim();
+
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Student updated successfully.";
+            return RedirectToAction("Students", "Admin");
+        }
+
+        [HttpGet]
+        public ActionResult DeleteStudent(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = db.STUDENTs.FirstOrDefault(s => s.StudentID == id);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == student.AccountID);
+                var registrationIds = db.REGISTRATIONs
+                    .Where(r => r.StudentID == student.StudentID)
+                    .Select(r => r.RegistrationID)
+                    .ToList();
+
+                var model = new AdminStudentViewModel
+                {
+                    StudentID = student.StudentID,
+                    AccountID = student.AccountID,
+                    Avatar = account != null ? account.Avatar : string.Empty,
+                    FullName = student.FullName,
+                    Email = account != null ? account.Email : string.Empty,
+                    DateOfBirth = student.DateOfBirth,
+                    PhoneNumber = student.PhoneNumber,
+                    IsActive = account != null && account.IsActive == true,
+                    RegistrationCount = registrationIds.Count,
+                    PaymentCount = db.PAYMENTs.Count(p => registrationIds.Contains(p.RegistrationID)),
+                    PlacementTestCount = db.PLACEMENT_TESTs.Count(t => t.StudentID == student.StudentID)
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ConfirmDeleteStudent(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = db.STUDENTs.FirstOrDefault(s => s.StudentID == id);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == student.AccountID);
+                if (account == null)
+                {
+                    TempData["Error"] = "Student account not found.";
+                    return RedirectToAction("Students", "Admin");
+                }
+
+                account.IsActive = false;
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Student deactivated successfully.";
+            return RedirectToAction("Students", "Admin");
+        }
+
+        public ActionResult Registrations(string search, string regStatus, string paymentStatus, int page = 1)
+        {
+            const int pageSize = 10;
+
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            search = (search ?? string.Empty).Trim();
+            regStatus = string.IsNullOrWhiteSpace(regStatus) ? "All" : regStatus.Trim();
+            paymentStatus = string.IsNullOrWhiteSpace(paymentStatus) ? "All" : paymentStatus.Trim();
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var query =
+                    from r in db.REGISTRATIONs
+                    join st in db.STUDENTs on r.StudentID equals st.StudentID into studentJoin
+                    from st in studentJoin.DefaultIfEmpty()
+                    join account in db.USER_ACCOUNTs on st.AccountID equals account.AccountID into accountJoin
+                    from account in accountJoin.DefaultIfEmpty()
+                    join c in db.CLASSes on r.ClassID equals c.ClassID into classJoin
+                    from c in classJoin.DefaultIfEmpty()
+                    join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                    from p in programJoin.DefaultIfEmpty()
+                    join t in db.TEACHERs on c.TeacherID equals t.TeacherID into teacherJoin
+                    from t in teacherJoin.DefaultIfEmpty()
+                    join pay in db.PAYMENTs on r.RegistrationID equals pay.RegistrationID into paymentJoin
+                    from pay in paymentJoin.DefaultIfEmpty()
+                    select new AdminRegistrationViewModel
+                    {
+                        RegistrationID = r.RegistrationID,
+                        StudentName = st != null ? st.FullName : string.Empty,
+                        StudentEmail = account != null ? account.Email : string.Empty,
+                        PhoneNumber = st != null ? st.PhoneNumber : string.Empty,
+                        ClassName = c != null ? c.ClassName : string.Empty,
+                        ProgramName = p != null ? p.ProgramName : string.Empty,
+                        TeacherName = t != null ? t.FullName : string.Empty,
+                        RegistrationDate = r.RegistrationDate,
+                        RegStatus = r.RegStatus,
+                        PaymentStatus = pay != null ? pay.PaymentStatus : "No payment",
+                        Amount = pay != null ? (decimal?)pay.Amount : null
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(r =>
+                        r.StudentName.Contains(search)
+                        || r.StudentEmail.Contains(search)
+                        || r.ClassName.Contains(search)
+                        || r.ProgramName.Contains(search));
+                }
+
+                if (regStatus != "All")
+                {
+                    query = query.Where(r => r.RegStatus == regStatus);
+                }
+
+                if (paymentStatus != "All")
+                {
+                    query = query.Where(r => r.PaymentStatus == paymentStatus);
+                }
+
+                var totalItems = query.Count();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < 1)
+                {
+                    totalPages = 1;
+                }
+
+                if (page > totalPages)
+                {
+                    page = totalPages;
+                }
+
+                var registrations = query
+                    .OrderByDescending(r => r.RegistrationDate)
+                    .ThenByDescending(r => r.RegistrationID)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new AdminRegistrationPageViewModel
+                {
+                    Registrations = registrations,
+                    Search = search,
+                    RegStatus = regStatus,
+                    PaymentStatus = paymentStatus,
+                    CurrentPage = page,
+                    TotalPages = totalPages
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult EditRegistration(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var model = (
+                    from r in db.REGISTRATIONs
+                    join st in db.STUDENTs on r.StudentID equals st.StudentID into studentJoin
+                    from st in studentJoin.DefaultIfEmpty()
+                    join c in db.CLASSes on r.ClassID equals c.ClassID into classJoin
+                    from c in classJoin.DefaultIfEmpty()
+                    join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                    from p in programJoin.DefaultIfEmpty()
+                    join pay in db.PAYMENTs on r.RegistrationID equals pay.RegistrationID into paymentJoin
+                    from pay in paymentJoin.DefaultIfEmpty()
+                    where r.RegistrationID == id
+                    select new AdminRegistrationFormViewModel
+                    {
+                        RegistrationID = r.RegistrationID,
+                        StudentName = st != null ? st.FullName : string.Empty,
+                        ClassName = c != null ? c.ClassName : string.Empty,
+                        ProgramName = p != null ? p.ProgramName : string.Empty,
+                        RegistrationDate = r.RegistrationDate,
+                        RegStatus = r.RegStatus,
+                        PaymentStatus = pay != null ? pay.PaymentStatus : "No payment"
+                    })
+                    .FirstOrDefault();
+
+                if (model == null)
+                {
+                    TempData["Error"] = "Registration not found.";
+                    return RedirectToAction("Registrations", "Admin");
+                }
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditRegistration(AdminRegistrationFormViewModel model)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            var allowedStatuses = new[] { "Pending", "Approved", "Cancelled" };
+            if (string.IsNullOrWhiteSpace(model.RegStatus) || !allowedStatuses.Contains(model.RegStatus))
+            {
+                ModelState.AddModelError("RegStatus", "Registration status is invalid.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var registration = db.REGISTRATIONs.FirstOrDefault(r => r.RegistrationID == model.RegistrationID);
+                if (registration == null)
+                {
+                    TempData["Error"] = "Registration not found.";
+                    return RedirectToAction("Registrations", "Admin");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var detail = (
+                        from r in db.REGISTRATIONs
+                        join st in db.STUDENTs on r.StudentID equals st.StudentID into studentJoin
+                        from st in studentJoin.DefaultIfEmpty()
+                        join c in db.CLASSes on r.ClassID equals c.ClassID into classJoin
+                        from c in classJoin.DefaultIfEmpty()
+                        join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                        from p in programJoin.DefaultIfEmpty()
+                        join pay in db.PAYMENTs on r.RegistrationID equals pay.RegistrationID into paymentJoin
+                        from pay in paymentJoin.DefaultIfEmpty()
+                        where r.RegistrationID == registration.RegistrationID
+                        select new
+                        {
+                            StudentName = st != null ? st.FullName : string.Empty,
+                            ClassName = c != null ? c.ClassName : string.Empty,
+                            ProgramName = p != null ? p.ProgramName : string.Empty,
+                            RegistrationDate = r.RegistrationDate,
+                            PaymentStatus = pay != null ? pay.PaymentStatus : "No payment"
+                        })
+                        .FirstOrDefault();
+
+                    if (detail != null)
+                    {
+                        model.StudentName = detail.StudentName;
+                        model.ClassName = detail.ClassName;
+                        model.ProgramName = detail.ProgramName;
+                        model.RegistrationDate = detail.RegistrationDate;
+                        model.PaymentStatus = detail.PaymentStatus;
+                    }
+
+                    TempData["Error"] = "Please check registration status.";
+                    return View(model);
+                }
+
+                registration.RegStatus = model.RegStatus;
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Registration status updated successfully.";
+            return RedirectToAction("Registrations", "Admin");
+        }
+
+        public ActionResult Payments(string search, string paymentStatus, string method, int page = 1)
+        {
+            const int pageSize = 10;
+
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            search = (search ?? string.Empty).Trim();
+            paymentStatus = string.IsNullOrWhiteSpace(paymentStatus) ? "All" : paymentStatus.Trim();
+            method = string.IsNullOrWhiteSpace(method) ? "All" : method.Trim();
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var allPayments = db.PAYMENTs;
+
+                var query =
+                    from pay in db.PAYMENTs
+                    join r in db.REGISTRATIONs on pay.RegistrationID equals r.RegistrationID into registrationJoin
+                    from r in registrationJoin.DefaultIfEmpty()
+                    join st in db.STUDENTs on r.StudentID equals st.StudentID into studentJoin
+                    from st in studentJoin.DefaultIfEmpty()
+                    join account in db.USER_ACCOUNTs on st.AccountID equals account.AccountID into accountJoin
+                    from account in accountJoin.DefaultIfEmpty()
+                    join c in db.CLASSes on r.ClassID equals c.ClassID into classJoin
+                    from c in classJoin.DefaultIfEmpty()
+                    join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                    from p in programJoin.DefaultIfEmpty()
+                    select new AdminPaymentViewModel
+                    {
+                        PaymentID = pay.PaymentID,
+                        RegistrationID = pay.RegistrationID,
+                        StudentName = st != null ? st.FullName : string.Empty,
+                        StudentEmail = account != null ? account.Email : string.Empty,
+                        ClassName = c != null ? c.ClassName : string.Empty,
+                        ProgramName = p != null ? p.ProgramName : string.Empty,
+                        Amount = pay.Amount,
+                        PaymentDate = pay.PaymentDate,
+                        Method = pay.Method,
+                        PaymentStatus = pay.PaymentStatus,
+                        RegStatus = r != null ? r.RegStatus : string.Empty
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(p =>
+                        p.StudentName.Contains(search)
+                        || p.StudentEmail.Contains(search)
+                        || p.ClassName.Contains(search)
+                        || p.ProgramName.Contains(search));
+                }
+
+                if (paymentStatus != "All")
+                {
+                    query = query.Where(p => p.PaymentStatus == paymentStatus);
+                }
+
+                if (method != "All")
+                {
+                    query = query.Where(p => p.Method == method);
+                }
+
+                var totalItems = query.Count();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < 1)
+                {
+                    totalPages = 1;
+                }
+
+                if (page > totalPages)
+                {
+                    page = totalPages;
+                }
+
+                var payments = query
+                    .OrderByDescending(p => p.PaymentDate)
+                    .ThenByDescending(p => p.PaymentID)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new AdminPaymentPageViewModel
+                {
+                    Payments = payments,
+                    Search = search,
+                    PaymentStatus = paymentStatus,
+                    Method = method,
+                    CurrentPage = page,
+                    TotalPages = totalPages,
+                    TotalPayments = allPayments.Count(),
+                    PaidPayments = allPayments.Count(p => p.PaymentStatus == "Paid"),
+                    UnpaidPayments = allPayments.Count(p => p.PaymentStatus == "Unpaid"),
+                    TotalRevenue = allPayments.Where(p => p.PaymentStatus == "Paid").Sum(p => (decimal?)p.Amount) ?? 0
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult EditPayment(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var model = (
+                    from pay in db.PAYMENTs
+                    join r in db.REGISTRATIONs on pay.RegistrationID equals r.RegistrationID into registrationJoin
+                    from r in registrationJoin.DefaultIfEmpty()
+                    join st in db.STUDENTs on r.StudentID equals st.StudentID into studentJoin
+                    from st in studentJoin.DefaultIfEmpty()
+                    join c in db.CLASSes on r.ClassID equals c.ClassID into classJoin
+                    from c in classJoin.DefaultIfEmpty()
+                    join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                    from p in programJoin.DefaultIfEmpty()
+                    where pay.PaymentID == id
+                    select new AdminPaymentFormViewModel
+                    {
+                        PaymentID = pay.PaymentID,
+                        RegistrationID = pay.RegistrationID,
+                        StudentName = st != null ? st.FullName : string.Empty,
+                        ClassName = c != null ? c.ClassName : string.Empty,
+                        ProgramName = p != null ? p.ProgramName : string.Empty,
+                        Amount = pay.Amount,
+                        PaymentDate = pay.PaymentDate,
+                        Method = pay.Method,
+                        PaymentStatus = pay.PaymentStatus
+                    })
+                    .FirstOrDefault();
+
+                if (model == null)
+                {
+                    TempData["Error"] = "Payment not found.";
+                    return RedirectToAction("Payments", "Admin");
+                }
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditPayment(AdminPaymentFormViewModel model)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            var allowedStatuses = new[] { "Unpaid", "Paid", "Failed", "Refunded" };
+            var allowedMethods = new[] { "Demo", "Cash", "Bank Transfer", "Online" };
+
+            if (string.IsNullOrWhiteSpace(model.PaymentStatus) || !allowedStatuses.Contains(model.PaymentStatus))
+            {
+                ModelState.AddModelError("PaymentStatus", "Payment status is invalid.");
+            }
+
+            if (model.PaymentStatus == "Paid" && string.IsNullOrWhiteSpace(model.Method))
+            {
+                ModelState.AddModelError("Method", "Method is required when payment status is Paid.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.Method) && !allowedMethods.Contains(model.Method))
+            {
+                ModelState.AddModelError("Method", "Payment method is invalid.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var payment = db.PAYMENTs.FirstOrDefault(p => p.PaymentID == model.PaymentID);
+                if (payment == null)
+                {
+                    TempData["Error"] = "Payment not found.";
+                    return RedirectToAction("Payments", "Admin");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    FillPaymentEditInfo(db, model);
+                    TempData["Error"] = "Please check payment information.";
+                    return View(model);
+                }
+
+                payment.Amount = model.Amount;
+                payment.Method = string.IsNullOrWhiteSpace(model.Method) ? null : model.Method.Trim();
+                payment.PaymentStatus = model.PaymentStatus;
+
+                if (payment.PaymentStatus == "Paid" && !payment.PaymentDate.HasValue)
+                {
+                    payment.PaymentDate = DateTime.Now;
+                }
+
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Payment updated successfully.";
+            return RedirectToAction("Payments", "Admin");
+        }
+
+        private static void FillPaymentEditInfo(LanguageCenterDataContext db, AdminPaymentFormViewModel model)
+        {
+            var detail = (
+                from pay in db.PAYMENTs
+                join r in db.REGISTRATIONs on pay.RegistrationID equals r.RegistrationID into registrationJoin
+                from r in registrationJoin.DefaultIfEmpty()
+                join st in db.STUDENTs on r.StudentID equals st.StudentID into studentJoin
+                from st in studentJoin.DefaultIfEmpty()
+                join c in db.CLASSes on r.ClassID equals c.ClassID into classJoin
+                from c in classJoin.DefaultIfEmpty()
+                join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                from p in programJoin.DefaultIfEmpty()
+                where pay.PaymentID == model.PaymentID
+                select new
+                {
+                    pay.RegistrationID,
+                    StudentName = st != null ? st.FullName : string.Empty,
+                    ClassName = c != null ? c.ClassName : string.Empty,
+                    ProgramName = p != null ? p.ProgramName : string.Empty,
+                    pay.PaymentDate
+                })
+                .FirstOrDefault();
+
+            if (detail == null)
+            {
+                return;
+            }
+
+            model.RegistrationID = detail.RegistrationID;
+            model.StudentName = detail.StudentName;
+            model.ClassName = detail.ClassName;
+            model.ProgramName = detail.ProgramName;
+            model.PaymentDate = detail.PaymentDate;
+        }
+
+        public ActionResult PlacementTests(string search, string status, string level, int page = 1)
+        {
+            const int pageSize = 10;
+
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            search = (search ?? string.Empty).Trim();
+            status = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
+            level = (level ?? string.Empty).Trim();
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var query =
+                    from test in db.PLACEMENT_TESTs
+                    join st in db.STUDENTs on test.StudentID equals st.StudentID into studentJoin
+                    from st in studentJoin.DefaultIfEmpty()
+                    join account in db.USER_ACCOUNTs on st.AccountID equals account.AccountID into accountJoin
+                    from account in accountJoin.DefaultIfEmpty()
+                    select new AdminPlacementTestViewModel
+                    {
+                        TestID = test.TestID,
+                        StudentName = st != null ? st.FullName : string.Empty,
+                        StudentEmail = account != null ? account.Email : string.Empty,
+                        PhoneNumber = st != null ? st.PhoneNumber : string.Empty,
+                        TestDate = test.TestDate,
+                        TestTime = test.TestTime,
+                        Level = test.Level,
+                        ResultScore = test.ResultScore,
+                        Status = test.Status
+                    };
+
+                var levels = db.PLACEMENT_TESTs
+                    .Where(t => t.Level != null && t.Level != string.Empty)
+                    .Select(t => t.Level)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(t =>
+                        t.StudentName.Contains(search)
+                        || t.StudentEmail.Contains(search)
+                        || t.PhoneNumber.Contains(search)
+                        || t.Level.Contains(search));
+                }
+
+                if (status != "All")
+                {
+                    query = query.Where(t => t.Status == status);
+                }
+
+                if (!string.IsNullOrWhiteSpace(level))
+                {
+                    query = query.Where(t => t.Level == level);
+                }
+
+                var totalItems = query.Count();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < 1)
+                {
+                    totalPages = 1;
+                }
+
+                if (page > totalPages)
+                {
+                    page = totalPages;
+                }
+
+                var placementTests = query
+                    .OrderByDescending(t => t.TestDate)
+                    .ThenByDescending(t => t.TestID)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new AdminPlacementTestPageViewModel
+                {
+                    PlacementTests = placementTests,
+                    Levels = levels,
+                    Search = search,
+                    Status = status,
+                    Level = level,
+                    CurrentPage = page,
+                    TotalPages = totalPages,
+                    TotalTests = db.PLACEMENT_TESTs.Count(),
+                    PendingTests = db.PLACEMENT_TESTs.Count(t => t.Status == "Pending"),
+                    CompletedTests = db.PLACEMENT_TESTs.Count(t => t.Status == "Completed"),
+                    CancelledTests = db.PLACEMENT_TESTs.Count(t => t.Status == "Cancelled")
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult EditPlacementTest(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var detail = (
+                    from test in db.PLACEMENT_TESTs
+                    join st in db.STUDENTs on test.StudentID equals st.StudentID into studentJoin
+                    from st in studentJoin.DefaultIfEmpty()
+                    join account in db.USER_ACCOUNTs on st.AccountID equals account.AccountID into accountJoin
+                    from account in accountJoin.DefaultIfEmpty()
+                    where test.TestID == id
+                    select new
+                    {
+                        TestID = test.TestID,
+                        StudentName = st != null ? st.FullName : string.Empty,
+                        StudentEmail = account != null ? account.Email : string.Empty,
+                        PhoneNumber = st != null ? st.PhoneNumber : string.Empty,
+                        TestDate = test.TestDate,
+                        TestTime = test.TestTime,
+                        Level = test.Level,
+                        ResultScore = test.ResultScore,
+                        Status = test.Status
+                    })
+                    .FirstOrDefault();
+
+                if (detail == null)
+                {
+                    TempData["Error"] = "Placement test not found.";
+                    return RedirectToAction("PlacementTests", "Admin");
+                }
+
+                var model = new AdminPlacementTestFormViewModel
+                {
+                    TestID = detail.TestID,
+                    StudentName = detail.StudentName,
+                    StudentEmail = detail.StudentEmail,
+                    PhoneNumber = detail.PhoneNumber,
+                    TestDate = detail.TestDate,
+                    TestTime = detail.TestTime.ToString(@"hh\:mm"),
+                    Level = detail.Level,
+                    ResultScore = detail.ResultScore,
+                    Status = detail.Status
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditPlacementTest(AdminPlacementTestFormViewModel model)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            var allowedStatuses = new[] { "Pending", "Completed", "Cancelled" };
+            TimeSpan testTime = TimeSpan.Zero;
+            decimal score;
+
+            if (string.IsNullOrWhiteSpace(model.Status) || !allowedStatuses.Contains(model.Status))
+            {
+                ModelState.AddModelError("Status", "Placement test status is invalid.");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.TestTime) || !TimeSpan.TryParse(model.TestTime, out testTime))
+            {
+                ModelState.AddModelError("TestTime", "Test time is invalid.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.ResultScore)
+                && (!decimal.TryParse(model.ResultScore, out score) || score < 0 || score > 100))
+            {
+                ModelState.AddModelError("ResultScore", "Result score must be from 0 to 100.");
+            }
+
+            if (model.Status == "Completed" && string.IsNullOrWhiteSpace(model.ResultScore))
+            {
+                ModelState.AddModelError("ResultScore", "Result score is required when status is Completed.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var placementTest = db.PLACEMENT_TESTs.FirstOrDefault(t => t.TestID == model.TestID);
+                if (placementTest == null)
+                {
+                    TempData["Error"] = "Placement test not found.";
+                    return RedirectToAction("PlacementTests", "Admin");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    FillPlacementTestEditInfo(db, model);
+                    TempData["Error"] = "Please check placement test information.";
+                    return View(model);
+                }
+
+                placementTest.TestDate = model.TestDate.Value.Date;
+                placementTest.TestTime = testTime;
+                placementTest.Level = (model.Level ?? string.Empty).Trim();
+                placementTest.ResultScore = string.IsNullOrWhiteSpace(model.ResultScore) ? null : model.ResultScore.Trim();
+                placementTest.Status = model.Status;
+
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Placement test updated successfully.";
+            return RedirectToAction("PlacementTests", "Admin");
+        }
+
+        private static void FillPlacementTestEditInfo(LanguageCenterDataContext db, AdminPlacementTestFormViewModel model)
+        {
+            var detail = (
+                from test in db.PLACEMENT_TESTs
+                join st in db.STUDENTs on test.StudentID equals st.StudentID into studentJoin
+                from st in studentJoin.DefaultIfEmpty()
+                join account in db.USER_ACCOUNTs on st.AccountID equals account.AccountID into accountJoin
+                from account in accountJoin.DefaultIfEmpty()
+                where test.TestID == model.TestID
+                select new
+                {
+                    StudentName = st != null ? st.FullName : string.Empty,
+                    StudentEmail = account != null ? account.Email : string.Empty,
+                    PhoneNumber = st != null ? st.PhoneNumber : string.Empty
+                })
+                .FirstOrDefault();
+
+            if (detail == null)
+            {
+                return;
+            }
+
+            model.StudentName = detail.StudentName;
+            model.StudentEmail = detail.StudentEmail;
+            model.PhoneNumber = detail.PhoneNumber;
+        }
+
         private ActionResult CheckAdminPermission()
         {
             if (Session["AccountID"] == null || Session["Role"] == null)

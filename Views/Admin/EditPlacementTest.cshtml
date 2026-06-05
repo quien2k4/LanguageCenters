@@ -1,0 +1,84 @@
+@model LanguageCenter.Models.AdminPlacementTestFormViewModel
+
+@{
+    ViewBag.Title = "Edit Placement Test";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Placement Test</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Test ID</dt>
+                        <dd class="col-sm-8">@Model.TestID</dd>
+
+                        <dt class="col-sm-4">Student</dt>
+                        <dd class="col-sm-8">@Model.StudentName</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.StudentEmail</dd>
+
+                        <dt class="col-sm-4">Phone</dt>
+                        <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+                        <dt class="col-sm-4">Current Result</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.ResultScore) ? "Not updated yet" : Model.ResultScore)</dd>
+                    </dl>
+
+                    @using (Html.BeginForm("EditPlacementTest", "Admin", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.TestID)
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.TestDate, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.TestDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required" })
+                                @Html.ValidationMessageFor(model => model.TestDate, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.TestTime, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.TestTime, new { @class = "form-control", type = "time", required = "required" })
+                                @Html.ValidationMessageFor(model => model.TestTime, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.Level, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Level, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Level, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.ResultScore, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.ResultScore, new { @class = "form-control", type = "number", min = "0", max = "100", step = "0.01" })
+                                @Html.ValidationMessageFor(model => model.ResultScore, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-12">
+                                @Html.LabelFor(model => model.Status, new { @class = "form-label" })
+                                <select id="Status" name="Status" class="form-select">
+                                    <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</option>
+                                    <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Completed</option>
+                                    <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Cancelled</option>
+                                </select>
+                                @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="@Url.Action("PlacementTests", "Admin")" class="btn btn-outline-secondary">Back to Placement Tests</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

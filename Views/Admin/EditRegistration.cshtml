@@ -1,0 +1,65 @@
+@model LanguageCenter.Models.AdminRegistrationFormViewModel
+
+@{
+    ViewBag.Title = "Edit Registration Status";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Registration Status</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Registration ID</dt>
+                        <dd class="col-sm-8">@Model.RegistrationID</dd>
+
+                        <dt class="col-sm-4">Student</dt>
+                        <dd class="col-sm-8">@Model.StudentName</dd>
+
+                        <dt class="col-sm-4">Class</dt>
+                        <dd class="col-sm-8">@Model.ClassName</dd>
+
+                        <dt class="col-sm-4">Program</dt>
+                        <dd class="col-sm-8">@Model.ProgramName</dd>
+
+                        <dt class="col-sm-4">Registration Date</dt>
+                        <dd class="col-sm-8">@(Model.RegistrationDate.HasValue ? Model.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</dd>
+
+                        <dt class="col-sm-4">Payment Status</dt>
+                        <dd class="col-sm-8">@Model.PaymentStatus</dd>
+                    </dl>
+
+                    @using (Html.BeginForm("EditRegistration", "Admin", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.RegistrationID)
+
+                        <div class="mb-3">
+                            @Html.LabelFor(model => model.RegStatus, new { @class = "form-label" })
+                            <select id="RegStatus" name="RegStatus" class="form-select">
+                                <option value="Pending" @(Model.RegStatus == "Pending" ? "selected" : "")>Pending</option>
+                                <option value="Approved" @(Model.RegStatus == "Approved" ? "selected" : "")>Approved</option>
+                                <option value="Cancelled" @(Model.RegStatus == "Cancelled" ? "selected" : "")>Cancelled</option>
+                            </select>
+                            @Html.ValidationMessageFor(model => model.RegStatus, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="@Url.Action("Registrations", "Admin")" class="btn btn-outline-secondary">Back to Registrations</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

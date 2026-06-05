@@ -1,0 +1,162 @@
+@model LanguageCenter.Models.AdminPaymentPageViewModel
+
+@{
+    ViewBag.Title = "Manage Payments";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Manage Payments</h2>
+        <p class="text-muted mb-0">Review and update student payment records.</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Total Payments</div>
+                    <h4 class="mb-0">@Model.TotalPayments</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Paid Payments</div>
+                    <h4 class="mb-0">@Model.PaidPayments</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Unpaid Payments</div>
+                    <h4 class="mb-0">@Model.UnpaidPayments</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Total Revenue</div>
+                    <h4 class="mb-0">@Model.TotalRevenue.ToString("N0")</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            @using (Html.BeginForm("Payments", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-lg-4 col-md-6">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Student, email, class, program" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="paymentStatus" class="form-label">Payment Status</label>
+                    <select id="paymentStatus" name="paymentStatus" class="form-select">
+                        <option value="All" @(Model.PaymentStatus == "All" ? "selected" : "")>All</option>
+                        <option value="Unpaid" @(Model.PaymentStatus == "Unpaid" ? "selected" : "")>Unpaid</option>
+                        <option value="Paid" @(Model.PaymentStatus == "Paid" ? "selected" : "")>Paid</option>
+                        <option value="Failed" @(Model.PaymentStatus == "Failed" ? "selected" : "")>Failed</option>
+                        <option value="Refunded" @(Model.PaymentStatus == "Refunded" ? "selected" : "")>Refunded</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="method" class="form-label">Method</label>
+                    <select id="method" name="method" class="form-select">
+                        <option value="All" @(Model.Method == "All" ? "selected" : "")>All</option>
+                        <option value="Demo" @(Model.Method == "Demo" ? "selected" : "")>Demo</option>
+                        <option value="Cash" @(Model.Method == "Cash" ? "selected" : "")>Cash</option>
+                        <option value="Bank Transfer" @(Model.Method == "Bank Transfer" ? "selected" : "")>Bank Transfer</option>
+                        <option value="Online" @(Model.Method == "Online" ? "selected" : "")>Online</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            @if (Model.Payments.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Registration ID</th>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Class</th>
+                                <th>Program</th>
+                                <th>Amount</th>
+                                <th>Payment Date</th>
+                                <th>Method</th>
+                                <th>Payment Status</th>
+                                <th>Reg Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Payments)
+                            {
+                                <tr>
+                                    <td>@item.PaymentID</td>
+                                    <td>@item.RegistrationID</td>
+                                    <td class="fw-semibold">@item.StudentName</td>
+                                    <td>@item.StudentEmail</td>
+                                    <td>@item.ClassName</td>
+                                    <td>@item.ProgramName</td>
+                                    <td>@item.Amount.ToString("N0")</td>
+                                    <td>@(item.PaymentDate.HasValue ? item.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Not paid yet")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Method) ? "-" : item.Method)</td>
+                                    <td>
+                                        <span class="badge @(item.PaymentStatus == "Paid" ? "bg-success" : item.PaymentStatus == "Unpaid" ? "bg-secondary" : item.PaymentStatus == "Failed" ? "bg-danger" : "bg-info")">
+                                            @(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "Updating" : item.PaymentStatus)
+                                        </span>
+                                    </td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.RegStatus) ? "Updating" : item.RegStatus)</td>
+                                    <td class="text-end">
+                                        <a href="@Url.Action("EditPayment", "Admin", new { id = item.PaymentID })" class="btn btn-sm btn-outline-primary">Edit Payment</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                if (Model.TotalPages > 1)
+                {
+                    <nav class="p-3" aria-label="Payment pagination">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Payments", "Admin", new { search = Model.Search, paymentStatus = Model.PaymentStatus, method = Model.Method, page = Model.CurrentPage - 1 })">Previous</a>
+                            </li>
+                            @for (var i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Payments", "Admin", new { search = Model.Search, paymentStatus = Model.PaymentStatus, method = Model.Method, page = i })">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Payments", "Admin", new { search = Model.Search, paymentStatus = Model.PaymentStatus, method = Model.Method, page = Model.CurrentPage + 1 })">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">No payments found.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

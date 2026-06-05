@@ -1,0 +1,59 @@
+	Di Chuyển Qua lại, nhảy , bay 
+enemy, boss
+target
+Skill : Tấn cộng đấm , chưởng kame.
+Áo : Giáp
+Quần : HP
+Găng : Tấn Cộng
+Giày : Mana (KP)
+Kính : Tốc Chạy
+
+NPC Giao tiếp chát chữ chay, giao nhiệm vụ, 
+Túi đồ: Có Item, có trang bị Áo Quần Găng giày (Có chỉ số)....
+Nhân vật mang trang bị sẽ cộng chỉ số theo trang bị
+Đánh quái rơi item 
+
+Nhặt item : trang bị (áo quần găng..) , ngọc rồng, đậu thần, tiền
+
+
+Tạo 15 map 
+Thần điện
+làng Aru
+- gồm có 5 map quái 7 máp boss (CÓ thể thêm chỉ tuỳ ý thêm sau) 
+
+mỗi máp có 1 boss có enemy bảo vệ boss 
+mỗi máp boss sẽ rơi 1 viên ngọc rồng từ 1 - 7 sao sao tuỳ map boss 
+vd: 
+Map 1 boss rồng 1 sao 
+Map 2 boss rồng 2 sao 
+.....
+Map 7 boss rồng 7 sao 
+
+gom 7 viên ngọc rồng trong túi
+
+Đến thần đện gặp NPC dende gọi rồng 
+Gọi rồng ước có những điều ước gồm có
+-Điều Ước 1 : Tăng HP;
+-Điều Ước 2: tăng mana;
+-Điều Ước 3 : Tăng Tấn công;
+nhiều điều khác 
+-Điều Ước ... : trang bị vip Áo chỉ víp hơn shop hoặc víp khi rơi quái
+
+
+Giao Task
+
+Thơ : 
+- NPC Mua đồ
+- làm quái bay ở trên không
+- Túi Đồ , Giao diện mang đang mang trang bị 
+
+Kiện : 
+fix tính tăng auto attack vào quái
+Gặp NPC dende Ước rồng bóng tối
+
+Quyền chỉ sức mạnh : 
+0 max 100tr 
+phần cộng chỉ số	
+Thêm map
+thêm boss
+

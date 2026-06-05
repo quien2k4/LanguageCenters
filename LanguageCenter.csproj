@@ -140,7 +140,14 @@
     <Compile Include="Models\StudentMyClassViewModel.cs" />
     <Compile Include="Models\StudentPaymentViewModel.cs" />
     <Compile Include="Models\StudentRegisterClassViewModel.cs" />
+    <Compile Include="Models\TeacherClassStudentsViewModel.cs" />
     <Compile Include="Models\TeacherDashboardViewModel.cs" />
+    <Compile Include="Models\TeacherMaterialsViewModel.cs" />
+    <Compile Include="Models\TeacherMyClassViewModel.cs" />
+    <Compile Include="Models\TeacherPlacementResultViewModel.cs" />
+    <Compile Include="Models\TeacherPlacementResultsPageViewModel.cs" />
+    <Compile Include="Models\TeacherStudentFeedbackPageViewModel.cs" />
+    <Compile Include="Models\TeacherStudentFeedbackViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +224,11 @@
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Teacher\Dashboard.cshtml" />
+    <Content Include="Views\Teacher\ClassStudents.cshtml" />
+    <Content Include="Views\Teacher\Materials.cshtml" />
+    <Content Include="Views\Teacher\MyClasses.cshtml" />
+    <Content Include="Views\Teacher\PlacementResults.cshtml" />
+    <Content Include="Views\Teacher\StudentFeedback.cshtml" />
     <Content Include="Views\Student\Profile.cshtml" />
     <Content Include="Views\Student\MyClasses.cshtml" />
     <Content Include="Views\Student\Payments.cshtml" />

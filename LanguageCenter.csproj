@@ -139,6 +139,9 @@
     <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\ProgramDetailViewModel.cs" />
     <Compile Include="Models\ProgramListViewModel.cs" />
+    <Compile Include="Models\StudentMyClassViewModel.cs" />
+    <Compile Include="Models\StudentPaymentViewModel.cs" />
+    <Compile Include="Models\StudentRegisterClassViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +219,9 @@
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Teacher\Dashboard.cshtml" />
     <Content Include="Views\Student\Profile.cshtml" />
+    <Content Include="Views\Student\MyClasses.cshtml" />
+    <Content Include="Views\Student\Payments.cshtml" />
+    <Content Include="Views\Student\RegisterClass.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

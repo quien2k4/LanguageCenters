@@ -1,0 +1,88 @@
+@model LanguageCenter.Models.StudentMyClassesViewModel
+
+@{
+    ViewBag.Title = "My Classes";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Classes</h2>
+            <p class="text-muted mb-0">Classes you have registered for.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="@Url.Action("Payments", "Student")" class="btn btn-outline-primary">View Payment</a>
+            <a href="@Url.Action("Index", "Program")" class="btn btn-primary">Back to Programs</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            @if (Model.Classes.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Registration ID</th>
+                                <th>Class</th>
+                                <th>Program</th>
+                                <th>Teacher</th>
+                                <th>Class Status</th>
+                                <th>Start Date</th>
+                                <th>Schedule</th>
+                                <th>Room</th>
+                                <th>Registration Date</th>
+                                <th>Reg Status</th>
+                                <th>Amount</th>
+                                <th>Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Classes)
+                            {
+                                <tr>
+                                    <td>@item.RegistrationID</td>
+                                    <td class="fw-semibold">@item.ClassName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ClassStatus) ? "Updating" : item.ClassStatus)</td>
+                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</td>
+                                    <td style="min-width: 220px;">@item.Schedule</td>
+                                    <td>@item.Room</td>
+                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">@(string.IsNullOrWhiteSpace(item.RegStatus) ? "Updating" : item.RegStatus)</span>
+                                    </td>
+                                    <td>@item.Amount.ToString("N0")</td>
+                                    <td>
+                                        <span class="badge @(item.PaymentStatus == "Unpaid" ? "bg-warning text-dark" : "bg-success")">
+                                            @(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "Updating" : item.PaymentStatus)
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">You have not registered for any classes yet.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

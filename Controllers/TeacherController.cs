@@ -283,12 +283,18 @@ namespace LanguageCenter.Controllers
             }
         }
 
-        public ActionResult Materials(int classId)
+        public ActionResult Materials(int? classId)
         {
             var authResult = CheckTeacherPermission();
             if (authResult != null)
             {
                 return authResult;
+            }
+
+            if (!classId.HasValue)
+            {
+                TempData["Error"] = "Please choose a class to manage materials.";
+                return RedirectToAction("MyClasses", "Teacher");
             }
 
             using (var db = new LanguageCenterDataContext(connectionString))
@@ -300,7 +306,7 @@ namespace LanguageCenter.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                var classInfo = GetTeacherClassInfo(db, classId);
+                var classInfo = GetTeacherClassInfo(db, classId.Value);
                 if (classInfo == null || classInfo.Class.TeacherID != teacher.TeacherID)
                 {
                     TempData["Error"] = "You do not have permission to manage this class.";
@@ -308,7 +314,7 @@ namespace LanguageCenter.Controllers
                 }
 
                 var materials = db.CLASS_MATERIALs
-                    .Where(m => m.ClassID == classId)
+                    .Where(m => m.ClassID == classId.Value)
                     .OrderByDescending(m => m.UploadDate)
                     .Select(m => new TeacherMaterialViewModel
                     {

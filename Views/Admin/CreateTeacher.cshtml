@@ -1,0 +1,72 @@
+@model LanguageCenter.Models.AdminTeacherFormViewModel
+
+@{
+    ViewBag.Title = "Create Teacher";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create Teacher</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    @using (Html.BeginForm("CreateTeacher", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.Email, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", type = "email", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.FullName, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.FullName, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.Password, new { @class = "form-label" })
+                                @Html.PasswordFor(model => model.Password, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.ConfirmPassword, new { @class = "form-label" })
+                                @Html.PasswordFor(model => model.ConfirmPassword, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-8">
+                                @Html.LabelFor(model => model.Expertise, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Expertise, new { @class = "form-control", required = "required" })
+                                @Html.ValidationMessageFor(model => model.Expertise, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" })
+                                    @Html.LabelFor(model => model.IsActive, new { @class = "form-check-label" })
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="avatarFile" class="form-label">Avatar Upload</label>
+                                <input type="file" id="avatarFile" name="avatarFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                            <a href="@Url.Action("Teachers", "Admin")" class="btn btn-outline-secondary">Back to Teachers</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -749,6 +749,344 @@ namespace LanguageCenter.Controllers
             return RedirectToAction("Classes", "Admin");
         }
 
+        public ActionResult Teachers(string search, string status, int page = 1)
+        {
+            const int pageSize = 10;
+
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            search = (search ?? string.Empty).Trim();
+            status = string.IsNullOrWhiteSpace(status) ? "All" : status.Trim();
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var query =
+                    from teacher in db.TEACHERs
+                    join account in db.USER_ACCOUNTs on teacher.AccountID equals account.AccountID
+                    select new AdminTeacherViewModel
+                    {
+                        TeacherID = teacher.TeacherID,
+                        AccountID = teacher.AccountID,
+                        Avatar = account.Avatar,
+                        FullName = teacher.FullName,
+                        Email = account.Email,
+                        Expertise = teacher.Expertise,
+                        IsActive = account.IsActive == true,
+                        ClassCount = db.CLASSes.Count(c => c.TeacherID == teacher.TeacherID)
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(t =>
+                        t.FullName.Contains(search)
+                        || t.Email.Contains(search)
+                        || (t.Expertise != null && t.Expertise.Contains(search)));
+                }
+
+                if (status == "Active")
+                {
+                    query = query.Where(t => t.IsActive);
+                }
+                else if (status == "Inactive")
+                {
+                    query = query.Where(t => !t.IsActive);
+                }
+
+                var totalItems = query.Count();
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < 1)
+                {
+                    totalPages = 1;
+                }
+
+                if (page > totalPages)
+                {
+                    page = totalPages;
+                }
+
+                var teachers = query
+                    .OrderBy(t => t.FullName)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var model = new AdminTeacherPageViewModel
+                {
+                    Teachers = teachers,
+                    Search = search,
+                    Status = status,
+                    CurrentPage = page,
+                    TotalPages = totalPages
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult CreateTeacher()
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            return View(new AdminTeacherFormViewModel { IsActive = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateTeacher(AdminTeacherFormViewModel model, HttpPostedFileBase avatarFile)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError("Password", "Password is required.");
+            }
+
+            if (model.Password != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "ConfirmPassword must match Password.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var email = (model.Email ?? string.Empty).Trim();
+                if (db.USER_ACCOUNTs.Any(a => a.Email == email))
+                {
+                    ModelState.AddModelError("Email", "Email already exists.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Please check teacher information.";
+                    return View(model);
+                }
+
+                var avatarUrl = SaveAvatarImage(avatarFile);
+                if (avatarFile != null && avatarFile.ContentLength > 0 && avatarUrl == null)
+                {
+                    TempData["Error"] = "Invalid avatar type. Please upload jpg, jpeg, png, gif, or webp.";
+                    return View(model);
+                }
+
+                var account = new USER_ACCOUNT
+                {
+                    Email = email,
+                    PasswordHash = model.Password,
+                    Role = "Teacher",
+                    Avatar = avatarUrl,
+                    IsActive = model.IsActive,
+                    FailedLoginAttempts = 0,
+                    IsLockedOut = false
+                };
+
+                db.USER_ACCOUNTs.InsertOnSubmit(account);
+                db.SubmitChanges();
+
+                var teacher = new TEACHER
+                {
+                    AccountID = account.AccountID,
+                    FullName = (model.FullName ?? string.Empty).Trim(),
+                    Expertise = (model.Expertise ?? string.Empty).Trim()
+                };
+
+                db.TEACHERs.InsertOnSubmit(teacher);
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Teacher created successfully.";
+            return RedirectToAction("Teachers", "Admin");
+        }
+
+        [HttpGet]
+        public ActionResult EditTeacher(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var teacher = db.TEACHERs.FirstOrDefault(t => t.TeacherID == id);
+                if (teacher == null)
+                {
+                    TempData["Error"] = "Teacher not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == teacher.AccountID);
+                if (account == null)
+                {
+                    TempData["Error"] = "Teacher account not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                var model = new AdminTeacherFormViewModel
+                {
+                    TeacherID = teacher.TeacherID,
+                    AccountID = teacher.AccountID,
+                    Email = account.Email,
+                    FullName = teacher.FullName,
+                    Expertise = teacher.Expertise,
+                    Avatar = account.Avatar,
+                    IsActive = account.IsActive == true
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditTeacher(AdminTeacherFormViewModel model, HttpPostedFileBase avatarFile)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var teacher = db.TEACHERs.FirstOrDefault(t => t.TeacherID == model.TeacherID);
+                if (teacher == null)
+                {
+                    TempData["Error"] = "Teacher not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == teacher.AccountID);
+                if (account == null)
+                {
+                    TempData["Error"] = "Teacher account not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                var email = (model.Email ?? string.Empty).Trim();
+                if (db.USER_ACCOUNTs.Any(a => a.Email == email && a.AccountID != account.AccountID))
+                {
+                    ModelState.AddModelError("Email", "Email already exists.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Please check teacher information.";
+                    model.Avatar = account.Avatar;
+                    return View(model);
+                }
+
+                var avatarUrl = SaveAvatarImage(avatarFile);
+                if (avatarFile != null && avatarFile.ContentLength > 0 && avatarUrl == null)
+                {
+                    TempData["Error"] = "Invalid avatar type. Please upload jpg, jpeg, png, gif, or webp.";
+                    model.Avatar = account.Avatar;
+                    return View(model);
+                }
+
+                account.Email = email;
+                account.IsActive = model.IsActive;
+                if (!string.IsNullOrWhiteSpace(avatarUrl))
+                {
+                    account.Avatar = avatarUrl;
+                }
+
+                teacher.FullName = (model.FullName ?? string.Empty).Trim();
+                teacher.Expertise = (model.Expertise ?? string.Empty).Trim();
+
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Teacher updated successfully.";
+            return RedirectToAction("Teachers", "Admin");
+        }
+
+        [HttpGet]
+        public ActionResult DeleteTeacher(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var teacher = db.TEACHERs.FirstOrDefault(t => t.TeacherID == id);
+                if (teacher == null)
+                {
+                    TempData["Error"] = "Teacher not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == teacher.AccountID);
+                var model = new AdminTeacherViewModel
+                {
+                    TeacherID = teacher.TeacherID,
+                    AccountID = teacher.AccountID,
+                    Avatar = account != null ? account.Avatar : string.Empty,
+                    FullName = teacher.FullName,
+                    Email = account != null ? account.Email : string.Empty,
+                    Expertise = teacher.Expertise,
+                    IsActive = account != null && account.IsActive == true,
+                    ClassCount = db.CLASSes.Count(c => c.TeacherID == teacher.TeacherID)
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ConfirmDeleteTeacher(int id)
+        {
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var teacher = db.TEACHERs.FirstOrDefault(t => t.TeacherID == id);
+                if (teacher == null)
+                {
+                    TempData["Error"] = "Teacher not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                var account = db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == teacher.AccountID);
+                if (account == null)
+                {
+                    TempData["Error"] = "Teacher account not found.";
+                    return RedirectToAction("Teachers", "Admin");
+                }
+
+                account.IsActive = false;
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Teacher deactivated successfully.";
+            return RedirectToAction("Teachers", "Admin");
+        }
+
         private ActionResult CheckAdminPermission()
         {
             if (Session["AccountID"] == null || Session["Role"] == null)
@@ -789,6 +1127,32 @@ namespace LanguageCenter.Controllers
             imageFile.SaveAs(physicalPath);
 
             return "/Content/Uploads/Programs/" + fileName;
+        }
+
+        private string SaveAvatarImage(HttpPostedFileBase avatarFile)
+        {
+            if (avatarFile == null || avatarFile.ContentLength <= 0)
+            {
+                return null;
+            }
+
+            var extension = Path.GetExtension(avatarFile.FileName);
+            if (!IsAllowedProgramImageExtension(extension))
+            {
+                return null;
+            }
+
+            var uploadFolder = Server.MapPath("~/Content/Uploads/Avatars");
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+            }
+
+            var fileName = string.Format("{0}_{1}{2}", DateTime.Now.Ticks, Guid.NewGuid().ToString("N"), extension);
+            var physicalPath = Path.Combine(uploadFolder, fileName);
+            avatarFile.SaveAs(physicalPath);
+
+            return "/Content/Uploads/Avatars/" + fileName;
         }
 
         private static bool IsAllowedProgramImageExtension(string extension)

@@ -1,0 +1,45 @@
+@model LanguageCenter.Models.AdminTeacherViewModel
+
+@{
+    ViewBag.Title = "Deactivate Teacher";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var avatar = string.IsNullOrWhiteSpace(Model.Avatar)
+        ? Url.Content("~/Content/Images/default-avatar.png")
+        : Url.Content(Model.Avatar);
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Deactivate Teacher</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        This will set the teacher account to inactive. Existing classes will not be deleted.
+                    </div>
+
+                    <div class="d-flex gap-3 mb-4">
+                        <img src="@avatar" alt="@Model.FullName" class="rounded-circle border" style="width: 96px; height: 96px; object-fit: cover;" />
+                        <div>
+                            <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                            <div class="text-muted">@Model.Email</div>
+                            <div class="text-muted">Expertise: @(string.IsNullOrWhiteSpace(Model.Expertise) ? "Updating" : Model.Expertise)</div>
+                            <div class="text-muted">Classes: @Model.ClassCount</div>
+                        </div>
+                    </div>
+
+                    @using (Html.BeginForm("ConfirmDeleteTeacher", "Admin", new { id = Model.TeacherID }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">Deactivate</button>
+                            <a href="@Url.Action("Teachers", "Admin")" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

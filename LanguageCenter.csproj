@@ -142,6 +142,9 @@
     <Compile Include="Models\AdminClassViewModel.cs" />
     <Compile Include="Models\AdminProgramPageViewModel.cs" />
     <Compile Include="Models\AdminProgramViewModel.cs" />
+    <Compile Include="Models\AdminTeacherFormViewModel.cs" />
+    <Compile Include="Models\AdminTeacherPageViewModel.cs" />
+    <Compile Include="Models\AdminTeacherViewModel.cs" />
     <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\ProgramDetailViewModel.cs" />
     <Compile Include="Models\ProgramListViewModel.cs" />
@@ -241,6 +244,10 @@
     <Content Include="Views\Admin\CreateClass.cshtml" />
     <Content Include="Views\Admin\EditClass.cshtml" />
     <Content Include="Views\Admin\DeleteClass.cshtml" />
+    <Content Include="Views\Admin\Teachers.cshtml" />
+    <Content Include="Views\Admin\CreateTeacher.cshtml" />
+    <Content Include="Views\Admin\EditTeacher.cshtml" />
+    <Content Include="Views\Admin\DeleteTeacher.cshtml" />
     <Content Include="Views\Teacher\Dashboard.cshtml" />
     <Content Include="Views\Teacher\ClassStudents.cshtml" />
     <Content Include="Views\Teacher\Materials.cshtml" />

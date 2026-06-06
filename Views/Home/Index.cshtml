@@ -48,7 +48,7 @@
                                 <p class="mb-1"><strong>Level:</strong> @(string.IsNullOrWhiteSpace(program.Level) ? "Updating" : program.Level)</p>
                                 <p class="mb-1"><strong>Duration:</strong> @(string.IsNullOrWhiteSpace(program.Duration) ? "Updating" : program.Duration)</p>
                                 <p class="mb-3"><strong>Fee:</strong> @program.Fee.ToString("N0")</p>
-                                <a href="#" class="btn btn-outline-primary mt-auto">View Detail</a>
+                                <a href="@Url.Action("Detail", "Program", new { id = program.ProgramID })" class="btn btn-outline-primary mt-auto">View Detail</a>
                             </div>
                         </div>
                     </div>

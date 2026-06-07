@@ -1,34 +1,71 @@
-name: Tự động Deploy lên SmarterASP
+
+name: Deploy lên SmarterASP.NET
 
 on:
   push:
-    branches: [ "master", "main" ] # Sẽ tự động kích hoạt khi có code mới đẩy lên nhánh master hoặc main
+    branches: [ "master", "main" ]
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
 
     steps:
-    - name: Tải code từ Git về máy ảo GitHub
-      uses: actions/checkout@v3
+    # ============================================
+    # BƯỚC 1: Tải code từ GitHub về máy ảo
+    # ============================================
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Cài đặt môi trường MSBuild
+    # ============================================
+    # BƯỚC 2: Cài đặt MSBuild
+    # ============================================
+    - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Cài đặt NuGet
+    # ============================================
+    # BƯỚC 3: Cài đặt NuGet CLI
+    # ============================================
+    - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
 
-    - name: Tải các thư viện (Restore Packages)
-      run: nuget restore LanguageCenter.sln 
+    # ============================================
+    # BƯỚC 4: Restore NuGet packages
+    # FIX: Dùng file .csproj thay vì .slnx
+    # ============================================
+    - name: Restore NuGet packages
+      run: nuget restore LanguageCenter.csproj -PackagesDirectory packages
 
-    - name: Biên dịch và Đóng gói code (Build)
-      run: msbuild LanguageCenter.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="${{ github.workspace }}\publish_output"
+    # ============================================
+    # BƯỚC 5: Build project
+    # FIX: Dùng đường dẫn tuyệt đối cho publishUrl
+    # ============================================
+    - name: Build and Publish
+      run: msbuild LanguageCenter.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="${{ github.workspace }}\publish_output" /p:DeployDefaultTarget=WebPublish
 
-    - name: Upload code lên SmarterASP qua FTP
+    # ============================================
+    # BƯỚC 5.5: Kiểm tra output (debug - xóa sau khi chạy OK)
+    # ============================================
+    - name: Verify publish output
+      run: |
+        echo "=== Kiem tra thu muc publish_output ==="
+        if (Test-Path "publish_output") {
+          echo "✅ Thu muc publish_output TON TAI"
+          Get-ChildItem "publish_output" -Recurse | Select-Object FullName | Format-Table -AutoSize
+        } else {
+          echo "❌ Thu muc publish_output KHONG TON TAI"
+          echo "=== Kiem tra cac thu muc hien co ==="
+          Get-ChildItem -Directory | Select-Object Name
+          exit 1
+        }
+
+    # ============================================
+    # BƯỚC 6: Upload lên SmarterASP qua FTP
+    # ============================================
+    - name: Deploy to SmarterASP via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish_output/
-        server-dir: /site1/ # Thư mục gốc chứa web của bạn
+        server-dir: /

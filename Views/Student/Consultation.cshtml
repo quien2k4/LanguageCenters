@@ -1,17 +1,17 @@
 ﻿@model LanguageCenter.Models.StudentConsultationsViewModel
 
 @{
-    ViewBag.Title = "Consultation";
+    ViewBag.Title = "Tư vấn";
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Consultation Requests</h2>
-            <p class="text-muted mb-0">Your questions and consultation request status.</p>
+            <h2 class="fw-bold mb-1">Yêu cầu tư vấn</h2>
+            <p class="text-muted mb-0">Câu hỏi và trạng thái yêu cầu tư vấn của bạn.</p>
         </div>
-        <a href="@Url.Action("CreateConsultation", "Student")" class="btn btn-primary">Send Consultation Request</a>
+        <a href="@Url.Action("CreateConsultation", "Student")" class="btn btn-primary">Gửi yêu cầu tư vấn</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -32,11 +32,11 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Consultation ID</th>
-                                <th>Guest Name</th>
-                                <th>Contact Information</th>
-                                <th>Question Content</th>
-                                <th>Request Status</th>
+                                <th>Mã tư vấn</th>
+                                <th>Họ tên</th>
+                                <th>Thông tin liên hệ</th>
+                                <th>Nội dung câu hỏi</th>
+                                <th>Trạng thái yêu cầu</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,7 +49,7 @@
                                     <td style="min-width: 260px;">@item.QuestionContent</td>
                                     <td>
                                         <span class="badge bg-warning text-dark">
-                                            @(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Pending" : item.RequestStatus)
+                                            @LanguageCenter.Models.DisplayText.Status(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Pending" : item.RequestStatus)
                                         </span>
                                     </td>
                                 </tr>
@@ -61,7 +61,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">You have not sent any consultation requests yet.</div>
+                    <div class="alert alert-info mb-0">Bạn chưa gửi yêu cầu tư vấn nào.</div>
                 </div>
             }
         </div>

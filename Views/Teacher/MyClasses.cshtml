@@ -1,17 +1,17 @@
-@model LanguageCenter.Models.TeacherMyClassesViewModel
+﻿@model LanguageCenter.Models.TeacherMyClassesViewModel
 
 @{
-    ViewBag.Title = "My Teaching Classes";
+    ViewBag.Title = "Lớp đang dạy";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">My Teaching Classes</h2>
-            <p class="text-muted mb-0">Classes assigned to your teacher account.</p>
+            <h2 class="fw-bold mb-1">Lớp đang dạy</h2>
+            <p class="text-muted mb-0">Các lớp được phân công cho tài khoản giáo viên của bạn.</p>
         </div>
-        <a href="@Url.Action("Dashboard", "Teacher")" class="btn btn-outline-primary">Back to Dashboard</a>
+        <a href="@Url.Action("Dashboard", "Teacher")" class="btn btn-outline-primary">Quay lại bảng điều khiển</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -32,15 +32,15 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Class ID</th>
-                                <th>Class Name</th>
-                                <th>Program</th>
-                                <th>Start Date</th>
-                                <th>Status</th>
-                                <th>Schedule</th>
-                                <th>Room</th>
-                                <th>Students</th>
-                                <th class="text-end">Actions</th>
+                                <th>Mã lớp</th>
+                                <th>Tên lớp</th>
+                                <th>Chương trình</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Trạng thái</th>
+                                <th>Lịch học</th>
+                                <th>Phòng</th>
+                                <th>Học viên</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,18 +49,18 @@
                                 <tr>
                                     <td>@item.ClassID</td>
                                     <td class="fw-semibold">@item.ClassName</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</td>
-                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Đang cập nhật" : item.ProgramName)</td>
+                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</td>
                                     <td>
-                                        <span class="badge bg-secondary">@(string.IsNullOrWhiteSpace(item.ClassStatus) ? "Updating" : item.ClassStatus)</span>
+                                        <span class="badge bg-secondary">@LanguageCenter.Models.DisplayText.Status(item.ClassStatus)</span>
                                     </td>
                                     <td style="min-width: 240px; white-space: pre-line;">@item.Schedule</td>
                                     <td>@item.Room</td>
                                     <td>@item.StudentCount</td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a href="@Url.Action("ClassStudents", "Teacher", new { classId = item.ClassID })" class="btn btn-sm btn-outline-primary">View Students</a>
-                                            <a href="@Url.Action("Materials", "Teacher", new { classId = item.ClassID })" class="btn btn-sm btn-outline-secondary">Materials</a>
+                                            <a href="@Url.Action("ClassStudents", "Teacher", new { classId = item.ClassID })" class="btn btn-sm btn-outline-primary">Xem học viên</a>
+                                            <a href="@Url.Action("Materials", "Teacher", new { classId = item.ClassID })" class="btn btn-sm btn-outline-secondary">Tài liệu</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -72,7 +72,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">You do not have any teaching classes yet.</div>
+                    <div class="alert alert-info mb-0">Bạn chưa có lớp giảng dạy nào.</div>
                 </div>
             }
         </div>

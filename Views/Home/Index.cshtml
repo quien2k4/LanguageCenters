@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.HomeViewModel
+﻿@model LanguageCenter.Models.HomeViewModel
 
 @{
-    ViewBag.Title = "Home";
+    ViewBag.Title = "Trang chủ";
     Layout = "~/Views/Shared/_PublicLayout.cshtml";
 }
 
@@ -9,13 +9,13 @@
     <div class="container py-5">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h1 class="display-5 fw-bold mb-3">Learn languages with confidence</h1>
+                <h1 class="display-5 fw-bold mb-3">Tự tin chinh phục ngoại ngữ</h1>
                 <p class="lead mb-4">
-                    Explore practical courses, upcoming classes, and experienced teachers at Language Center.
+                    Khám phá các khóa học thực tế, lớp học sắp mở và đội ngũ giáo viên giàu kinh nghiệm.
                 </p>
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="#featured-programs" class="btn btn-light btn-lg">View Programs</a>
-                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-light btn-lg">Register Now</a>
+                    <a href="#featured-programs" class="btn btn-light btn-lg">Xem chương trình</a>
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-light btn-lg">Đăng ký ngay</a>
                 </div>
             </div>
         </div>
@@ -26,8 +26,8 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
-                <h2 class="fw-bold mb-1">Featured Programs</h2>
-                <p class="text-muted mb-0">Active programs available for new students.</p>
+                <h2 class="fw-bold mb-1">Chương trình nổi bật</h2>
+                <p class="text-muted mb-0">Các chương trình đang mở cho học viên mới.</p>
             </div>
         </div>
 
@@ -45,10 +45,10 @@
                             <img src="@imageUrl" class="card-img-top" alt="@program.ProgramName" style="height: 180px; object-fit: cover;" />
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">@program.ProgramName</h5>
-                                <p class="mb-1"><strong>Level:</strong> @(string.IsNullOrWhiteSpace(program.Level) ? "Updating" : program.Level)</p>
-                                <p class="mb-1"><strong>Duration:</strong> @(string.IsNullOrWhiteSpace(program.Duration) ? "Updating" : program.Duration)</p>
-                                <p class="mb-3"><strong>Fee:</strong> @program.Fee.ToString("N0")</p>
-                                <a href="@Url.Action("Detail", "Program", new { id = program.ProgramID })" class="btn btn-outline-primary mt-auto">View Detail</a>
+                                <p class="mb-1"><strong>Trình độ:</strong> @(string.IsNullOrWhiteSpace(program.Level) ? "Đang cập nhật" : program.Level)</p>
+                                <p class="mb-1"><strong>Thời lượng:</strong> @(string.IsNullOrWhiteSpace(program.Duration) ? "Đang cập nhật" : program.Duration)</p>
+                                <p class="mb-3"><strong>Học phí:</strong> @program.Fee.ToString("N0")</p>
+                                <a href="@Url.Action("Detail", "Program", new { id = program.ProgramID })" class="btn btn-outline-primary mt-auto">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
         }
         else
         {
-            <div class="alert alert-info mb-0">No active programs available.</div>
+            <div class="alert alert-info mb-0">Chưa có chương trình đang mở.</div>
         }
     </div>
 </section>
@@ -65,8 +65,8 @@
 <section class="py-5 bg-light">
     <div class="container">
         <div class="mb-4">
-            <h2 class="fw-bold mb-1">New Classes</h2>
-            <p class="text-muted mb-0">Latest classes sorted by start date.</p>
+            <h2 class="fw-bold mb-1">Lớp mới</h2>
+            <p class="text-muted mb-0">Các lớp mới nhất theo ngày bắt đầu.</p>
         </div>
 
         @if (Model.NewClasses.Any())
@@ -77,11 +77,11 @@
                     <div class="col-md-6 col-lg-3">
                         <div class="card h-100 shadow-sm border-0">
                             <div class="card-body">
-                                <span class="badge bg-primary mb-3">@(string.IsNullOrWhiteSpace(item.StatusName) ? "Updating" : item.StatusName)</span>
+                                <span class="badge bg-primary mb-3">@LanguageCenter.Models.DisplayText.Status(item.StatusName)</span>
                                 <h5 class="card-title">@item.ClassName</h5>
-                                <p class="mb-1"><strong>Program:</strong> @(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</p>
-                                <p class="mb-1"><strong>Teacher:</strong> @(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</p>
-                                <p class="mb-0"><strong>Start:</strong> @(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</p>
+                                <p class="mb-1"><strong>Chương trình:</strong> @(string.IsNullOrWhiteSpace(item.ProgramName) ? "Đang cập nhật" : item.ProgramName)</p>
+                                <p class="mb-1"><strong>Giáo viên:</strong> @(string.IsNullOrWhiteSpace(item.TeacherName) ? "Đang cập nhật" : item.TeacherName)</p>
+                                <p class="mb-0"><strong>Bắt đầu:</strong> @(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</p>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
         }
         else
         {
-            <div class="alert alert-info mb-0">No classes available.</div>
+            <div class="alert alert-info mb-0">Chưa có lớp học nào.</div>
         }
     </div>
 </section>
@@ -98,8 +98,8 @@
 <section class="py-5">
     <div class="container">
         <div class="mb-4">
-            <h2 class="fw-bold mb-1">Teachers</h2>
-            <p class="text-muted mb-0">Meet our teaching team.</p>
+            <h2 class="fw-bold mb-1">Giáo viên</h2>
+            <p class="text-muted mb-0">Gặp gỡ đội ngũ giảng dạy của chúng tôi.</p>
         </div>
 
         @if (Model.Teachers.Any())
@@ -116,7 +116,7 @@
                             <div class="card-body p-4">
                                 <img src="@avatarUrl" alt="@teacher.FullName" class="rounded-circle mb-3" style="width: 110px; height: 110px; object-fit: cover;" />
                                 <h5 class="card-title mb-2">@teacher.FullName</h5>
-                                <p class="text-muted mb-0">@(string.IsNullOrWhiteSpace(teacher.Expertise) ? "Expertise updating" : teacher.Expertise)</p>
+                                <p class="text-muted mb-0">@(string.IsNullOrWhiteSpace(teacher.Expertise) ? "Đang cập nhật chuyên môn" : teacher.Expertise)</p>
                             </div>
                         </div>
                     </div>
@@ -125,7 +125,7 @@
         }
         else
         {
-            <div class="alert alert-info mb-0">No teachers available.</div>
+            <div class="alert alert-info mb-0">Chưa có giáo viên nào.</div>
         }
     </div>
 </section>

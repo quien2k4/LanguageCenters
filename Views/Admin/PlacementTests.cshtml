@@ -1,21 +1,21 @@
-@model LanguageCenter.Models.AdminPlacementTestPageViewModel
+﻿@model LanguageCenter.Models.AdminPlacementTestPageViewModel
 
 @{
-    ViewBag.Title = "Manage Placement Tests";
+    ViewBag.Title = "Quản lý kiểm tra đầu vào";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Manage Placement Tests</h2>
-        <p class="text-muted mb-0">Review placement test schedules and update results.</p>
+        <h2 class="fw-bold mb-1">Quản lý kiểm tra đầu vào</h2>
+        <p class="text-muted mb-0">Xem lịch kiểm tra đầu vào và cập nhật kết quả.</p>
     </div>
 
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Total Tests</div>
+                    <div class="text-muted small">Tổng bài kiểm tra</div>
                     <h4 class="mb-0">@Model.TotalTests</h4>
                 </div>
             </div>
@@ -23,7 +23,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Pending Tests</div>
+                    <div class="text-muted small">Bài kiểm tra chờ xử lý</div>
                     <h4 class="mb-0">@Model.PendingTests</h4>
                 </div>
             </div>
@@ -31,7 +31,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Completed Tests</div>
+                    <div class="text-muted small">Bài kiểm tra hoàn thành</div>
                     <h4 class="mb-0">@Model.CompletedTests</h4>
                 </div>
             </div>
@@ -39,7 +39,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Cancelled Tests</div>
+                    <div class="text-muted small">Bài kiểm tra đã hủy</div>
                     <h4 class="mb-0">@Model.CancelledTests</h4>
                 </div>
             </div>
@@ -51,22 +51,22 @@
             @using (Html.BeginForm("PlacementTests", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
                 <div class="col-lg-4 col-md-6">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Student, email, phone, level" />
+                    <label for="search" class="form-label">Tìm kiếm</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Học viên, email, số điện thoại, trình độ" />
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label for="status" class="form-label">Status</label>
+                    <label for="status" class="form-label">Trạng thái</label>
                     <select id="status" name="status" class="form-select">
-                        <option value="All" @(Model.Status == "All" ? "selected" : "")>All</option>
-                        <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</option>
-                        <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Completed</option>
-                        <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Cancelled</option>
+                        <option value="All" @(Model.Status == "All" ? "selected" : "")>Tất cả</option>
+                        <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                        <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Hoàn thành</option>
+                        <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Đã hủy</option>
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label for="level" class="form-label">Level</label>
+                    <label for="level" class="form-label">Trình độ</label>
                     <select id="level" name="level" class="form-select">
-                        <option value="">All</option>
+                        <option value="">Tất cả</option>
                         @foreach (var item in Model.Levels)
                         {
                             <option value="@item" @(Model.Level == item ? "selected" : "")>@item</option>
@@ -75,8 +75,8 @@
                 </div>
                 <div class="col-lg-2 col-md-6">
                     <div class="admin-filter-actions">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                        <a href="@Url.Action("PlacementTests", "Admin")" class="btn btn-outline-secondary">Reset</a>
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <a href="@Url.Action("PlacementTests", "Admin")" class="btn btn-outline-secondary">Đặt lại</a>
                     </div>
                 </div>
             }
@@ -91,16 +91,16 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Test ID</th>
-                                <th>Student</th>
+                                <th>Mã kiểm tra</th>
+                                <th>Học viên</th>
                                 <th>Email</th>
-                                <th>Phone</th>
-                                <th>Test Date</th>
-                                <th>Test Time</th>
-                                <th>Level</th>
-                                <th>Result Score</th>
-                                <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th>Số điện thoại</th>
+                                <th>Ngày kiểm tra</th>
+                                <th>Giờ kiểm tra</th>
+                                <th>Trình độ</th>
+                                <th>Kết quả</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,18 +110,18 @@
                                     <td>@item.TestID</td>
                                     <td class="fw-semibold">@item.StudentName</td>
                                     <td>@item.StudentEmail</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Updating" : item.PhoneNumber)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Đang cập nhật" : item.PhoneNumber)</td>
                                     <td>@item.TestDate.ToString("dd/MM/yyyy")</td>
                                     <td>@item.TestTime.ToString(@"hh\:mm")</td>
                                     <td>@item.Level</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ResultScore) ? "Not updated yet" : item.ResultScore)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ResultScore) ? "Chưa cập nhật" : item.ResultScore)</td>
                                     <td>
                                         <span class="badge @(item.Status == "Completed" ? "bg-success" : item.Status == "Cancelled" ? "bg-danger" : "bg-warning text-dark")">
-                                            @(string.IsNullOrWhiteSpace(item.Status) ? "Updating" : item.Status)
+                                            @LanguageCenter.Models.DisplayText.Status(item.Status)
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <a href="@Url.Action("EditPlacementTest", "Admin", new { id = item.TestID })" class="btn btn-sm btn-outline-primary">Edit Result</a>
+                                        <a href="@Url.Action("EditPlacementTest", "Admin", new { id = item.TestID })" class="btn btn-sm btn-outline-primary">Sửa kết quả</a>
                                     </td>
                                 </tr>
                             }
@@ -131,10 +131,10 @@
 
                 if (Model.TotalPages > 1)
                 {
-                    <nav class="p-3" aria-label="Placement test pagination">
+                    <nav class="p-3" aria-label="Phân trang kiểm tra đầu vào">
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("PlacementTests", "Admin", new { search = Model.Search, status = Model.Status, level = Model.Level, page = Model.CurrentPage - 1 })">Previous</a>
+                                <a class="page-link" href="@Url.Action("PlacementTests", "Admin", new { search = Model.Search, status = Model.Status, level = Model.Level, page = Model.CurrentPage - 1 })">Trước</a>
                             </li>
                             @for (var i = 1; i <= Model.TotalPages; i++)
                             {
@@ -143,7 +143,7 @@
                                 </li>
                             }
                             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("PlacementTests", "Admin", new { search = Model.Search, status = Model.Status, level = Model.Level, page = Model.CurrentPage + 1 })">Next</a>
+                                <a class="page-link" href="@Url.Action("PlacementTests", "Admin", new { search = Model.Search, status = Model.Status, level = Model.Level, page = Model.CurrentPage + 1 })">Sau</a>
                             </li>
                         </ul>
                     </nav>
@@ -152,7 +152,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No placement tests found.</div>
+                    <div class="alert alert-info mb-0">Không tìm thấy bài kiểm tra đầu vào.</div>
                 </div>
             }
         </div>

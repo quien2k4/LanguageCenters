@@ -1,15 +1,15 @@
-@model LanguageCenter.Models.AdminProgramPageViewModel
+﻿@model LanguageCenter.Models.AdminProgramPageViewModel
 
 @{
-    ViewBag.Title = "Manage Programs";
+    ViewBag.Title = "Quản lý chương trình";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="admin-page-header mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Manage Programs</h2>
-            <p class="text-muted mb-0">Create, update, and deactivate language programs.</p>
+            <h2 class="fw-bold mb-1">Quản lý chương trình</h2>
+            <p class="text-muted mb-0">Thêm, cập nhật và ngừng hoạt động các chương trình ngoại ngữ.</p>
         </div>
     </div>
 
@@ -28,13 +28,13 @@
             @using (Html.BeginForm("Programs", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
                 <div class="col-lg-3 col-md-6">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Program name" />
+                    <label for="search" class="form-label">Tìm kiếm</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tên chương trình" />
                 </div>
                 <div class="col-lg-2 col-md-6">
-                    <label for="level" class="form-label">Level</label>
+                    <label for="level" class="form-label">Trình độ</label>
                     <select id="level" name="level" class="form-select">
-                        <option value="">All levels</option>
+                        <option value="">Tất cả trình độ</option>
                         @foreach (var item in Model.Levels)
                         {
                             <option value="@item" @(Model.Level == item ? "selected" : "")>@item</option>
@@ -42,18 +42,18 @@
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-6">
-                    <label for="status" class="form-label">Status</label>
+                    <label for="status" class="form-label">Trạng thái</label>
                     <select id="status" name="status" class="form-select">
-                        <option value="All" @(Model.Status == "All" ? "selected" : "")>All</option>
-                        <option value="Active" @(Model.Status == "Active" ? "selected" : "")>Active</option>
-                        <option value="Inactive" @(Model.Status == "Inactive" ? "selected" : "")>Inactive</option>
+                        <option value="All" @(Model.Status == "All" ? "selected" : "")>Tất cả</option>
+                        <option value="Active" @(Model.Status == "Active" ? "selected" : "")>Đang hoạt động</option>
+                        <option value="Inactive" @(Model.Status == "Inactive" ? "selected" : "")>Ngừng hoạt động</option>
                     </select>
                 </div>
                 <div class="col-lg-5 col-md-12">
                     <div class="admin-filter-actions">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                        <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Reset</a>
-                        <a href="@Url.Action("CreateProgram", "Admin")" class="btn btn-success">Create</a>
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Đặt lại</a>
+                        <a href="@Url.Action("CreateProgram", "Admin")" class="btn btn-success">Thêm mới</a>
                     </div>
                 </div>
             }
@@ -68,14 +68,14 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Program ID</th>
-                                <th>Image</th>
-                                <th>Program Name</th>
-                                <th>Level</th>
-                                <th>Duration</th>
-                                <th>Fee</th>
-                                <th>Active</th>
-                                <th class="text-end">Actions</th>
+                                <th>Mã chương trình</th>
+                                <th>Hình ảnh</th>
+                                <th>Tên chương trình</th>
+                                <th>Trình độ</th>
+                                <th>Thời lượng</th>
+                                <th>Học phí</th>
+                                <th>Hoạt động</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -91,18 +91,18 @@
                                         <img src="@imageUrl" alt="@item.ProgramName" class="rounded" style="width: 84px; height: 56px; object-fit: cover;" />
                                     </td>
                                     <td class="fw-semibold">@item.ProgramName</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Updating" : item.Level)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Duration) ? "Updating" : item.Duration)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Đang cập nhật" : item.Level)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Duration) ? "Đang cập nhật" : item.Duration)</td>
                                     <td>@item.Fee.ToString("N0")</td>
                                     <td>
                                         <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
-                                            @(item.IsActive ? "Active" : "Inactive")
+                                            @(item.IsActive ? "Đang hoạt động" : "Ngừng hoạt động")
                                         </span>
                                     </td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a href="@Url.Action("EditProgram", "Admin", new { id = item.ProgramID })" class="btn btn-sm btn-outline-primary">Edit</a>
-                                            <a href="@Url.Action("DeleteProgram", "Admin", new { id = item.ProgramID })" class="btn btn-sm btn-outline-danger">Delete</a>
+                                            <a href="@Url.Action("EditProgram", "Admin", new { id = item.ProgramID })" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                            <a href="@Url.Action("DeleteProgram", "Admin", new { id = item.ProgramID })" class="btn btn-sm btn-outline-danger">Xóa</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -113,10 +113,10 @@
 
                 if (Model.TotalPages > 1)
                 {
-                    <nav class="p-3" aria-label="Program pagination">
+                    <nav class="p-3" aria-label="Phân trang chương trình">
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = Model.CurrentPage - 1 })">Previous</a>
+                                <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = Model.CurrentPage - 1 })">Trước</a>
                             </li>
                             @for (var i = 1; i <= Model.TotalPages; i++)
                             {
@@ -125,7 +125,7 @@
                                 </li>
                             }
                             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = Model.CurrentPage + 1 })">Next</a>
+                                <a class="page-link" href="@Url.Action("Programs", "Admin", new { search = Model.Search, level = Model.Level, status = Model.Status, page = Model.CurrentPage + 1 })">Sau</a>
                             </li>
                         </ul>
                     </nav>
@@ -134,7 +134,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No programs found.</div>
+                    <div class="alert alert-info mb-0">Không tìm thấy chương trình.</div>
                 </div>
             }
         </div>

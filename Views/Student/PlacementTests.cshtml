@@ -1,17 +1,17 @@
 ﻿@model LanguageCenter.Models.StudentPlacementTestsViewModel
 
 @{
-    ViewBag.Title = "Placement Tests";
+    ViewBag.Title = "Kiểm tra đầu vào";
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Placement Tests</h2>
-            <p class="text-muted mb-0">Your registered placement test schedule and results.</p>
+            <h2 class="fw-bold mb-1">Kiểm tra đầu vào</h2>
+            <p class="text-muted mb-0">Lịch kiểm tra đầu vào và kết quả của bạn.</p>
         </div>
-        <a href="@Url.Action("CreatePlacementTest", "Student")" class="btn btn-primary">Register Placement Test</a>
+        <a href="@Url.Action("CreatePlacementTest", "Student")" class="btn btn-primary">Đăng ký kiểm tra đầu vào</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -32,12 +32,12 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Test ID</th>
-                                <th>Test Date</th>
-                                <th>Test Time</th>
-                                <th>Level</th>
-                                <th>Result Score</th>
-                                <th>Status</th>
+                                <th>Mã bài kiểm tra</th>
+                                <th>Ngày kiểm tra</th>
+                                <th>Giờ kiểm tra</th>
+                                <th>Trình độ</th>
+                                <th>Điểm kết quả</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,10 +47,10 @@
                                     <td>@item.TestID</td>
                                     <td>@item.TestDate.ToString("dd/MM/yyyy")</td>
                                     <td>@item.TestTime.ToString(@"hh\:mm")</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Updating" : item.Level)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ResultScore) ? "Not updated yet" : item.ResultScore)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Đang cập nhật" : item.Level)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ResultScore) ? "Chưa cập nhật" : item.ResultScore)</td>
                                     <td>
-                                        <span class="badge bg-warning text-dark">@(string.IsNullOrWhiteSpace(item.Status) ? "Pending" : item.Status)</span>
+                                        <span class="badge bg-warning text-dark">@LanguageCenter.Models.DisplayText.Status(string.IsNullOrWhiteSpace(item.Status) ? "Pending" : item.Status)</span>
                                     </td>
                                 </tr>
                             }
@@ -61,7 +61,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">You have not registered for any placement tests yet.</div>
+                    <div class="alert alert-info mb-0">Bạn chưa đăng ký bài kiểm tra đầu vào nào.</div>
                 </div>
             }
         </div>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace LanguageCenter.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Vui long nhap day du thong tin dang nhap.";
+                TempData["Error"] = "Vui lòng nhập đầy đủ thông tin đăng nhập.";
                 return View(model);
             }
 
@@ -35,25 +35,25 @@ namespace LanguageCenter.Controllers
 
                 if (account == null)
                 {
-                    TempData["Error"] = "Email khong ton tai.";
+                    TempData["Error"] = "Email không tồn tại.";
                     return View(model);
                 }
 
                 if (account.IsActive != true)
                 {
-                    TempData["Error"] = "Tai khoan chua duoc kich hoat.";
+                    TempData["Error"] = "Tài khoản chưa được kích hoạt.";
                     return View(model);
                 }
 
                 if (account.IsLockedOut == true)
                 {
-                    TempData["Error"] = "Tai khoan da bi khoa.";
+                    TempData["Error"] = "Tài khoản đã bị khóa.";
                     return View(model);
                 }
 
                 if (account.PasswordHash != model.Password)
                 {
-                    TempData["Error"] = "Mat khau khong dung.";
+                    TempData["Error"] = "Mật khẩu không đúng.";
                     return View(model);
                 }
 
@@ -62,7 +62,7 @@ namespace LanguageCenter.Controllers
                 Session["FullName"] = GetFullName(db, account);
                 Session["Avatar"] = account.Avatar;
 
-                TempData["Success"] = "Dang nhap thanh cong.";
+                TempData["Success"] = "Đăng nhập thành công.";
 
                 switch ((account.Role ?? string.Empty).Trim())
                 {
@@ -74,7 +74,7 @@ namespace LanguageCenter.Controllers
                         return RedirectToAction("Profile", "Student");
                     default:
                         Session.Clear();
-                        TempData["Error"] = "Role tai khoan khong hop le.";
+                        TempData["Error"] = "Vai trò tài khoản không hợp lệ.";
                         return RedirectToAction("Login");
                 }
             }
@@ -92,13 +92,13 @@ namespace LanguageCenter.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Vui long nhap day du thong tin dang ky.";
+                TempData["Error"] = "Vui lòng nhập đầy đủ thông tin đăng ký.";
                 return View(model);
             }
 
             if (model.Password != model.ConfirmPassword)
             {
-                TempData["Error"] = "Password va ConfirmPassword phai giong nhau.";
+                TempData["Error"] = "Mật khẩu và xác nhận mật khẩu phải giống nhau.";
                 return View(model);
             }
 
@@ -109,7 +109,7 @@ namespace LanguageCenter.Controllers
 
                 if (isEmailExists)
                 {
-                    TempData["Error"] = "Email da ton tai.";
+                    TempData["Error"] = "Email đã tồn tại.";
                     return View(model);
                 }
 
@@ -137,7 +137,7 @@ namespace LanguageCenter.Controllers
                 db.SubmitChanges();
             }
 
-            TempData["Success"] = "Dang ky thanh cong. Vui long dang nhap.";
+            TempData["Success"] = "Đăng ký thành công. Vui lòng đăng nhập.";
             return RedirectToAction("Login");
         }
 
@@ -179,16 +179,17 @@ namespace LanguageCenter.Controllers
         public string Email { get; set; }
 
         [Required]
+        [Display(Name = "Mật khẩu")]
         public string Password { get; set; }
 
-        [Display(Name = "Remember Me")]
+        [Display(Name = "Ghi nhớ đăng nhập")]
         public bool RememberMe { get; set; }
     }
 
     public class RegisterViewModel
     {
         [Required]
-        [Display(Name = "Full Name")]
+        [Display(Name = "Họ tên")]
         public string FullName { get; set; }
 
         [Required]
@@ -196,14 +197,15 @@ namespace LanguageCenter.Controllers
         public string Email { get; set; }
 
         [Required]
+        [Display(Name = "Mật khẩu")]
         public string Password { get; set; }
 
         [Required]
-        [Display(Name = "Confirm Password")]
+        [Display(Name = "Xác nhận mật khẩu")]
         public string ConfirmPassword { get; set; }
 
         [Required]
-        [Display(Name = "Phone Number")]
+        [Display(Name = "Số điện thoại")]
         public string PhoneNumber { get; set; }
     }
 }

@@ -1,0 +1,46 @@
+﻿@model LanguageCenter.Models.PaymentResultViewModel
+
+@{
+    ViewBag.Title = "Kết quả thanh toán";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") mb-4">
+                <h4 class="alert-heading">@Model.Title</h4>
+                <p class="mb-0">@Model.Message</p>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Mã thanh toán</div>
+                        <div class="fw-bold">@(Model.PaymentID.HasValue ? Model.PaymentID.Value.ToString() : "-")</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Số tiền</div>
+                        <div class="fw-bold">@(string.IsNullOrWhiteSpace(Model.Amount) ? "-" : Model.Amount)</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Giao dịch VNPAY</div>
+                        <div class="fw-bold">@(string.IsNullOrWhiteSpace(Model.TransactionNo) ? "-" : Model.TransactionNo)</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Mã phản hồi</div>
+                        <div class="fw-bold">@(string.IsNullOrWhiteSpace(Model.ResponseCode) ? "-" : Model.ResponseCode)</div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="@Url.Action("Payments", "Student")" class="btn btn-primary">Quay lại thanh toán</a>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminConsultationFormViewModel
+﻿@model LanguageCenter.Models.AdminConsultationFormViewModel
 
 @{
-    ViewBag.Title = "Edit Consultation Status";
+    ViewBag.Title = "Sửa trạng thái tư vấn";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Edit Consultation Status</h4>
+                    <h4 class="mb-0">Sửa trạng thái tư vấn</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -19,20 +19,20 @@
                     }
 
                     <dl class="row mb-4">
-                        <dt class="col-sm-4">Consultation ID</dt>
+                        <dt class="col-sm-4">Mã tư vấn</dt>
                         <dd class="col-sm-8">@Model.ConsultationID</dd>
 
-                        <dt class="col-sm-4">Guest Name</dt>
+                        <dt class="col-sm-4">Tên khách</dt>
                         <dd class="col-sm-8">@Model.GuestName</dd>
 
-                        <dt class="col-sm-4">Contact</dt>
+                        <dt class="col-sm-4">Liên hệ</dt>
                         <dd class="col-sm-8">@Model.ContactInformation</dd>
 
-                        <dt class="col-sm-4">Question</dt>
+                        <dt class="col-sm-4">Câu hỏi</dt>
                         <dd class="col-sm-8">@Model.QuestionContent</dd>
 
-                        <dt class="col-sm-4">Current Status</dt>
-                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.RequestStatus) ? "Updating" : Model.RequestStatus)</dd>
+                        <dt class="col-sm-4">Trạng thái hiện tại</dt>
+                        <dd class="col-sm-8">@LanguageCenter.Models.DisplayText.Status(Model.RequestStatus)</dd>
                     </dl>
 
                     @using (Html.BeginForm("EditConsultation", "Admin", FormMethod.Post))
@@ -43,17 +43,17 @@
                         <div class="mb-3">
                             @Html.LabelFor(model => model.RequestStatus, new { @class = "form-label" })
                             <select id="RequestStatus" name="RequestStatus" class="form-select">
-                                <option value="Pending" @(Model.RequestStatus == "Pending" ? "selected" : "")>Pending</option>
-                                <option value="Processing" @(Model.RequestStatus == "Processing" ? "selected" : "")>Processing</option>
-                                <option value="Completed" @(Model.RequestStatus == "Completed" ? "selected" : "")>Completed</option>
-                                <option value="Cancelled" @(Model.RequestStatus == "Cancelled" ? "selected" : "")>Cancelled</option>
+                                <option value="Pending" @(Model.RequestStatus == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                                <option value="Processing" @(Model.RequestStatus == "Processing" ? "selected" : "")>Đang xử lý</option>
+                                <option value="Completed" @(Model.RequestStatus == "Completed" ? "selected" : "")>Hoàn thành</option>
+                                <option value="Cancelled" @(Model.RequestStatus == "Cancelled" ? "selected" : "")>Đã hủy</option>
                             </select>
                             @Html.ValidationMessageFor(model => model.RequestStatus, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            <a href="@Url.Action("Consultations", "Admin")" class="btn btn-outline-secondary">Back to Consultations</a>
+                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            <a href="@Url.Action("Consultations", "Admin")" class="btn btn-outline-secondary">Quay lại tư vấn</a>
                         </div>
                     }
                 </div>

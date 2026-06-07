@@ -1,7 +1,7 @@
 ﻿@model LanguageCenter.Models.CreatePlacementTestViewModel
 
 @{
-    ViewBag.Title = "Register Placement Test";
+    ViewBag.Title = "Đăng ký kiểm tra đầu vào";
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Register Placement Test</h4>
+                    <h4 class="mb-0">Đăng ký kiểm tra đầu vào</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -23,30 +23,37 @@
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            @Html.LabelFor(model => model.TestDate, new { @class = "form-label" })
+                            @Html.LabelFor(model => model.TestDate, "Ngày kiểm tra", new { @class = "form-label" })
                             @Html.TextBoxFor(model => model.TestDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", required = "required" })
                             @Html.ValidationMessageFor(model => model.TestDate, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="mb-3">
-                            @Html.LabelFor(model => model.TestTime, new { @class = "form-label" })
+                            @Html.LabelFor(model => model.TestTime, "Giờ kiểm tra", new { @class = "form-label" })
                             @Html.TextBoxFor(model => model.TestTime, new { @class = "form-control", type = "time", required = "required" })
                             @Html.ValidationMessageFor(model => model.TestTime, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="mb-4">
-                            @Html.LabelFor(model => model.Level, new { @class = "form-label" })
+                            @Html.LabelFor(model => model.Level, "Trình độ", new { @class = "form-label" })
                             @Html.DropDownListFor(
                                 model => model.Level,
-                                new SelectList(new[] { "Beginner", "Elementary", "Intermediate", "Upper Intermediate", "Advanced" }),
-                                "Select level",
+                                new[]
+                                {
+                                    new SelectListItem { Value = "Beginner", Text = "Mới bắt đầu" },
+                                    new SelectListItem { Value = "Elementary", Text = "Sơ cấp" },
+                                    new SelectListItem { Value = "Intermediate", Text = "Trung cấp" },
+                                    new SelectListItem { Value = "Upper Intermediate", Text = "Trung cao cấp" },
+                                    new SelectListItem { Value = "Advanced", Text = "Nâng cao" }
+                                },
+                                "Chọn trình độ",
                                 new { @class = "form-select", required = "required" })
                             @Html.ValidationMessageFor(model => model.Level, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="d-flex flex-wrap gap-2">
-                            <button type="submit" class="btn btn-primary">Register Placement Test</button>
-                            <a href="@Url.Action("PlacementTests", "Student")" class="btn btn-outline-secondary">Back to Placement Tests</a>
+                            <button type="submit" class="btn btn-primary">Đăng ký kiểm tra</button>
+                            <a href="@Url.Action("PlacementTests", "Student")" class="btn btn-outline-secondary">Quay lại kiểm tra đầu vào</a>
                         </div>
                     }
                 </div>

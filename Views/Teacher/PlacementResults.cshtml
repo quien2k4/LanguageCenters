@@ -1,17 +1,17 @@
-@model LanguageCenter.Models.TeacherPlacementResultsPageViewModel
+﻿@model LanguageCenter.Models.TeacherPlacementResultsPageViewModel
 
 @{
-    ViewBag.Title = "Placement Test Results";
+    ViewBag.Title = "Kết quả kiểm tra đầu vào";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Placement Test Results</h2>
-            <p class="text-muted mb-0">View student placement test registrations and results.</p>
+            <h2 class="fw-bold mb-1">Kết quả kiểm tra đầu vào</h2>
+            <p class="text-muted mb-0">Xem đăng ký và kết quả kiểm tra đầu vào của học viên.</p>
         </div>
-        <a href="@Url.Action("Dashboard", "Teacher")" class="btn btn-outline-primary">Back to Dashboard</a>
+        <a href="@Url.Action("Dashboard", "Teacher")" class="btn btn-outline-primary">Quay lại bảng điều khiển</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -29,21 +29,21 @@
             @using (Html.BeginForm("PlacementResults", "Teacher", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
             {
                 <div class="col-md-5">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Student name or level" />
+                    <label for="search" class="form-label">Tìm kiếm</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tên học viên hoặc trình độ" />
                 </div>
                 <div class="col-md-4">
-                    <label for="status" class="form-label">Status</label>
+                    <label for="status" class="form-label">Trạng thái</label>
                     <select id="status" name="status" class="form-select">
-                        <option value="">All statuses</option>
+                        <option value="">Tất cả trạng thái</option>
                         @foreach (var item in Model.Statuses)
                         {
-                            <option value="@item" @(Model.Status == item ? "selected" : "")>@item</option>
+                            <option value="@item" @(Model.Status == item ? "selected" : "")>@LanguageCenter.Models.DisplayText.Status(item)</option>
                         }
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
                 </div>
             }
         </div>
@@ -57,14 +57,14 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Test ID</th>
-                                <th>Student Name</th>
-                                <th>Phone Number</th>
-                                <th>Test Date</th>
-                                <th>Test Time</th>
-                                <th>Level</th>
-                                <th>Result Score</th>
-                                <th>Status</th>
+                                <th>Mã bài kiểm tra</th>
+                                <th>Tên học viên</th>
+                                <th>Số điện thoại</th>
+                                <th>Ngày kiểm tra</th>
+                                <th>Giờ kiểm tra</th>
+                                <th>Trình độ</th>
+                                <th>Điểm kết quả</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,14 +72,14 @@
                             {
                                 <tr>
                                     <td>@item.TestID</td>
-                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Unknown student" : item.StudentName)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Updating" : item.PhoneNumber)</td>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Học viên chưa xác định" : item.StudentName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Đang cập nhật" : item.PhoneNumber)</td>
                                     <td>@item.TestDate.ToString("dd/MM/yyyy")</td>
                                     <td>@item.TestTime.ToString(@"hh\:mm")</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Updating" : item.Level)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ResultScore) ? "Not updated yet" : item.ResultScore)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Level) ? "Đang cập nhật" : item.Level)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ResultScore) ? "Chưa cập nhật" : item.ResultScore)</td>
                                     <td>
-                                        <span class="badge bg-info text-dark">@(string.IsNullOrWhiteSpace(item.Status) ? "Updating" : item.Status)</span>
+                                        <span class="badge bg-info text-dark">@LanguageCenter.Models.DisplayText.Status(item.Status)</span>
                                     </td>
                                 </tr>
                             }
@@ -89,10 +89,10 @@
 
                 if (Model.TotalPages > 1)
                 {
-                    <nav class="p-3" aria-label="Placement results pagination">
+                    <nav class="p-3" aria-label="Phân trang kết quả kiểm tra đầu vào">
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("PlacementResults", "Teacher", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage - 1 })">Previous</a>
+                                <a class="page-link" href="@Url.Action("PlacementResults", "Teacher", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage - 1 })">Trước</a>
                             </li>
 
                             @for (var i = 1; i <= Model.TotalPages; i++)
@@ -103,7 +103,7 @@
                             }
 
                             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("PlacementResults", "Teacher", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage + 1 })">Next</a>
+                                <a class="page-link" href="@Url.Action("PlacementResults", "Teacher", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage + 1 })">Sau</a>
                             </li>
                         </ul>
                     </nav>
@@ -112,7 +112,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No placement test results found.</div>
+                    <div class="alert alert-info mb-0">Không tìm thấy kết quả kiểm tra đầu vào.</div>
                 </div>
             }
         </div>

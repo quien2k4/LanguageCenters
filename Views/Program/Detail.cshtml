@@ -1,4 +1,4 @@
-@model LanguageCenter.Models.ProgramDetailViewModel
+﻿@model LanguageCenter.Models.ProgramDetailViewModel
 
 @{
     ViewBag.Title = Model.ProgramName;
@@ -18,33 +18,33 @@
             <div class="col-lg-7">
                 <h1 class="fw-bold mb-3">@Model.ProgramName</h1>
                 <p class="text-muted mb-4">
-                    @(string.IsNullOrWhiteSpace(Model.Description) ? "Description is updating." : Model.Description)
+                    @(string.IsNullOrWhiteSpace(Model.Description) ? "Mô tả đang được cập nhật." : Model.Description)
                 </p>
 
                 <div class="row g-3">
                     <div class="col-md-4">
                         <div class="bg-white border rounded p-3 h-100">
-                            <div class="text-muted small">Level</div>
-                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Level) ? "Updating" : Model.Level)</div>
+                            <div class="text-muted small">Trình độ</div>
+                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Level) ? "Đang cập nhật" : Model.Level)</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="bg-white border rounded p-3 h-100">
-                            <div class="text-muted small">Duration</div>
-                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Duration) ? "Updating" : Model.Duration)</div>
+                            <div class="text-muted small">Thời lượng</div>
+                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Duration) ? "Đang cập nhật" : Model.Duration)</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="bg-white border rounded p-3 h-100">
-                            <div class="text-muted small">Fee</div>
+                            <div class="text-muted small">Học phí</div>
                             <div class="fw-semibold">@Model.Fee.ToString("N0")</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <h5 class="fw-bold">Output Standard</h5>
-                    <p class="mb-0">@(string.IsNullOrWhiteSpace(Model.OutputStandard) ? "Output standard is updating." : Model.OutputStandard)</p>
+                    <h5 class="fw-bold">Chuẩn đầu ra</h5>
+                    <p class="mb-0">@(string.IsNullOrWhiteSpace(Model.OutputStandard) ? "Chuẩn đầu ra đang được cập nhật." : Model.OutputStandard)</p>
                 </div>
             </div>
         </div>
@@ -55,10 +55,10 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
-                <h2 class="fw-bold mb-1">Related Classes</h2>
-                <p class="text-muted mb-0">Classes currently connected to this program.</p>
+                <h2 class="fw-bold mb-1">Lớp liên quan</h2>
+                <p class="text-muted mb-0">Các lớp đang thuộc chương trình này.</p>
             </div>
-            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary">Back to Programs</a>
+            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary">Quay lại chương trình</a>
         </div>
 
         @if (Model.RelatedClasses.Any())
@@ -67,11 +67,11 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Class Name</th>
-                            <th>Teacher</th>
-                            <th>Status</th>
-                            <th>Start Date</th>
-                            <th class="text-end">Action</th>
+                            <th>Tên lớp</th>
+                            <th>Giáo viên</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày bắt đầu</th>
+                            <th class="text-end">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,21 +79,21 @@
                         {
                             <tr>
                                 <td class="fw-semibold">@item.ClassName</td>
-                                <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</td>
-                                <td>@(string.IsNullOrWhiteSpace(item.StatusName) ? "Updating" : item.StatusName)</td>
-                                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Đang cập nhật" : item.TeacherName)</td>
+                                <td>@LanguageCenter.Models.DisplayText.Status(item.StatusName)</td>
+                                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</td>
                                 <td class="text-end">
                                     @if (Session["AccountID"] == null)
                                     {
-                                        <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm">Register</a>
+                                        <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm">Đăng ký</a>
                                     }
                                     else if (Model.CurrentRole == "Student")
                                     {
-                                        <a href="@Url.Action("RegisterClass", "Student", new { classId = item.ClassID })" class="btn btn-primary btn-sm">Register</a>
+                                        <a href="@Url.Action("RegisterClass", "Student", new { classId = item.ClassID })" class="btn btn-primary btn-sm">Đăng ký</a>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">Not available</span>
+                                        <span class="badge bg-secondary">Không khả dụng</span>
                                     }
                                 </td>
                             </tr>
@@ -104,13 +104,13 @@
         }
         else
         {
-            <div class="alert alert-info mb-0">No classes available for this program.</div>
+            <div class="alert alert-info mb-0">Chưa có lớp học cho chương trình này.</div>
         }
 
         @if (Session["AccountID"] != null && (Model.CurrentRole == "Admin" || Model.CurrentRole == "Teacher"))
         {
             <div class="alert alert-warning mt-4 mb-0">
-                Admin and Teacher accounts cannot register for classes.
+                Tài khoản quản trị và giáo viên không thể đăng ký lớp học.
             </div>
         }
     </div>

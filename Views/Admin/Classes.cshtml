@@ -1,15 +1,15 @@
-@model LanguageCenter.Models.AdminClassPageViewModel
+﻿@model LanguageCenter.Models.AdminClassPageViewModel
 
 @{
-    ViewBag.Title = "Manage Classes";
+    ViewBag.Title = "Quản lý lớp học";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="admin-page-header mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Manage Classes</h2>
-            <p class="text-muted mb-0">Create, update, and change class status.</p>
+            <h2 class="fw-bold mb-1">Quản lý lớp học</h2>
+            <p class="text-muted mb-0">Thêm, cập nhật và thay đổi trạng thái lớp học.</p>
         </div>
     </div>
 
@@ -28,26 +28,26 @@
             @using (Html.BeginForm("Classes", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
                 <div class="col-lg-2 col-md-6">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Class or program" />
+                    <label for="search" class="form-label">Tìm kiếm</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Lớp hoặc chương trình" />
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label for="programId" class="form-label">Program</label>
-                    @Html.DropDownList("programId", Model.Programs, "All programs", new { @class = "form-select" })
+                    <label for="programId" class="form-label">Chương trình</label>
+                    @Html.DropDownList("programId", Model.Programs, "Tất cả chương trình", new { @class = "form-select" })
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label for="teacherId" class="form-label">Teacher</label>
-                    @Html.DropDownList("teacherId", Model.Teachers, "All teachers", new { @class = "form-select" })
+                    <label for="teacherId" class="form-label">Giáo viên</label>
+                    @Html.DropDownList("teacherId", Model.Teachers, "Tất cả giáo viên", new { @class = "form-select" })
                 </div>
                 <div class="col-lg-2 col-md-6">
-                    <label for="statusId" class="form-label">Status</label>
-                    @Html.DropDownList("statusId", Model.Statuses, "All statuses", new { @class = "form-select" })
+                    <label for="statusId" class="form-label">Trạng thái</label>
+                    @Html.DropDownList("statusId", Model.Statuses, "Tất cả trạng thái", new { @class = "form-select" })
                 </div>
                 <div class="col-lg-2 col-md-12">
                     <div class="admin-filter-actions">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                        <a href="@Url.Action("Classes", "Admin")" class="btn btn-outline-secondary">Reset</a>
-                        <a href="@Url.Action("CreateClass", "Admin")" class="btn btn-success">Create</a>
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <a href="@Url.Action("Classes", "Admin")" class="btn btn-outline-secondary">Đặt lại</a>
+                        <a href="@Url.Action("CreateClass", "Admin")" class="btn btn-success">Thêm mới</a>
                     </div>
                 </div>
             }
@@ -62,16 +62,16 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Class ID</th>
-                                <th>Class Name</th>
-                                <th>Program</th>
-                                <th>Teacher</th>
-                                <th>Status</th>
-                                <th>Start Date</th>
-                                <th>Schedule</th>
-                                <th>Room</th>
-                                <th>Students</th>
-                                <th class="text-end">Actions</th>
+                                <th>Mã lớp</th>
+                                <th>Tên lớp</th>
+                                <th>Chương trình</th>
+                                <th>Giáo viên</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Lịch học</th>
+                                <th>Phòng</th>
+                                <th>Học viên</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -80,17 +80,17 @@
                                 <tr>
                                     <td>@item.ClassID</td>
                                     <td class="fw-semibold">@item.ClassName</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</td>
-                                    <td><span class="badge bg-secondary">@(string.IsNullOrWhiteSpace(item.StatusName) ? "Updating" : item.StatusName)</span></td>
-                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Đang cập nhật" : item.ProgramName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Đang cập nhật" : item.TeacherName)</td>
+                                    <td><span class="badge bg-secondary">@LanguageCenter.Models.DisplayText.Status(item.StatusName)</span></td>
+                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</td>
                                     <td class="text-wrap-cell" style="white-space: pre-line;">@item.Schedule</td>
                                     <td>@item.Room</td>
                                     <td>@item.StudentCount</td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a href="@Url.Action("EditClass", "Admin", new { id = item.ClassID })" class="btn btn-sm btn-outline-primary">Edit</a>
-                                            <a href="@Url.Action("DeleteClass", "Admin", new { id = item.ClassID })" class="btn btn-sm btn-outline-danger">Delete</a>
+                                            <a href="@Url.Action("EditClass", "Admin", new { id = item.ClassID })" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                            <a href="@Url.Action("DeleteClass", "Admin", new { id = item.ClassID })" class="btn btn-sm btn-outline-danger">Xóa</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -101,10 +101,10 @@
 
                 if (Model.TotalPages > 1)
                 {
-                    <nav class="p-3" aria-label="Class pagination">
+                    <nav class="p-3" aria-label="Phân trang lớp học">
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("Classes", "Admin", new { search = Model.Search, programId = Model.ProgramID, teacherId = Model.TeacherID, statusId = Model.StatusID, page = Model.CurrentPage - 1 })">Previous</a>
+                                <a class="page-link" href="@Url.Action("Classes", "Admin", new { search = Model.Search, programId = Model.ProgramID, teacherId = Model.TeacherID, statusId = Model.StatusID, page = Model.CurrentPage - 1 })">Trước</a>
                             </li>
                             @for (var i = 1; i <= Model.TotalPages; i++)
                             {
@@ -113,7 +113,7 @@
                                 </li>
                             }
                             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("Classes", "Admin", new { search = Model.Search, programId = Model.ProgramID, teacherId = Model.TeacherID, statusId = Model.StatusID, page = Model.CurrentPage + 1 })">Next</a>
+                                <a class="page-link" href="@Url.Action("Classes", "Admin", new { search = Model.Search, programId = Model.ProgramID, teacherId = Model.TeacherID, statusId = Model.StatusID, page = Model.CurrentPage + 1 })">Sau</a>
                             </li>
                         </ul>
                     </nav>
@@ -122,7 +122,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No classes found.</div>
+                    <div class="alert alert-info mb-0">Không tìm thấy lớp học.</div>
                 </div>
             }
         </div>

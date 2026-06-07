@@ -1,21 +1,21 @@
-@model LanguageCenter.Models.AdminConsultationPageViewModel
+﻿@model LanguageCenter.Models.AdminConsultationPageViewModel
 
 @{
-    ViewBag.Title = "Manage Consultations";
+    ViewBag.Title = "Quản lý tư vấn";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Manage Consultations</h2>
-        <p class="text-muted mb-0">Review student consultation requests and update request status.</p>
+        <h2 class="fw-bold mb-1">Quản lý tư vấn</h2>
+        <p class="text-muted mb-0">Xem yêu cầu tư vấn và cập nhật trạng thái xử lý.</p>
     </div>
 
     <div class="row g-3 mb-4">
         <div class="col-md">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Total Consultations</div>
+                    <div class="text-muted small">Tổng yêu cầu tư vấn</div>
                     <h4 class="mb-0">@Model.TotalConsultations</h4>
                 </div>
             </div>
@@ -23,7 +23,7 @@
         <div class="col-md">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Pending</div>
+                    <div class="text-muted small">Chờ xử lý</div>
                     <h4 class="mb-0">@Model.PendingConsultations</h4>
                 </div>
             </div>
@@ -31,7 +31,7 @@
         <div class="col-md">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Processing</div>
+                    <div class="text-muted small">Đang xử lý</div>
                     <h4 class="mb-0">@Model.ProcessingConsultations</h4>
                 </div>
             </div>
@@ -39,7 +39,7 @@
         <div class="col-md">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Completed</div>
+                    <div class="text-muted small">Hoàn thành</div>
                     <h4 class="mb-0">@Model.CompletedConsultations</h4>
                 </div>
             </div>
@@ -47,7 +47,7 @@
         <div class="col-md">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="text-muted small">Cancelled</div>
+                    <div class="text-muted small">Đã hủy</div>
                     <h4 class="mb-0">@Model.CancelledConsultations</h4>
                 </div>
             </div>
@@ -59,23 +59,23 @@
             @using (Html.BeginForm("Consultations", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
                 <div class="col-md-7">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Guest name, contact, question content" />
+                    <label for="search" class="form-label">Tìm kiếm</label>
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tên khách, liên hệ, nội dung câu hỏi" />
                 </div>
                 <div class="col-md-3">
-                    <label for="status" class="form-label">Request Status</label>
+                    <label for="status" class="form-label">Trạng thái yêu cầu</label>
                     <select id="status" name="status" class="form-select">
-                        <option value="All" @(Model.Status == "All" ? "selected" : "")>All</option>
-                        <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</option>
-                        <option value="Processing" @(Model.Status == "Processing" ? "selected" : "")>Processing</option>
-                        <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Completed</option>
-                        <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Cancelled</option>
+                        <option value="All" @(Model.Status == "All" ? "selected" : "")>Tất cả</option>
+                        <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                        <option value="Processing" @(Model.Status == "Processing" ? "selected" : "")>Đang xử lý</option>
+                        <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Hoàn thành</option>
+                        <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Đã hủy</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <div class="admin-filter-actions">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                        <a href="@Url.Action("Consultations", "Admin")" class="btn btn-outline-secondary">Reset</a>
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <a href="@Url.Action("Consultations", "Admin")" class="btn btn-outline-secondary">Đặt lại</a>
                     </div>
                 </div>
             }
@@ -90,12 +90,12 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Consultation ID</th>
-                                <th>Guest Name</th>
-                                <th>Contact</th>
-                                <th>Question Content</th>
-                                <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th>Mã tư vấn</th>
+                                <th>Tên khách</th>
+                                <th>Liên hệ</th>
+                                <th>Nội dung câu hỏi</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,16 +103,16 @@
                             {
                                 <tr>
                                     <td>@item.ConsultationID</td>
-                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.GuestName) ? "Updating" : item.GuestName)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ContactInformation) ? "Updating" : item.ContactInformation)</td>
-                                    <td class="text-wrap-cell">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "No question" : item.QuestionContent)</td>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.GuestName) ? "Đang cập nhật" : item.GuestName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ContactInformation) ? "Đang cập nhật" : item.ContactInformation)</td>
+                                    <td class="text-wrap-cell">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "Chưa có câu hỏi" : item.QuestionContent)</td>
                                     <td>
                                         <span class="badge @(item.RequestStatus == "Completed" ? "bg-success" : item.RequestStatus == "Cancelled" ? "bg-danger" : item.RequestStatus == "Processing" ? "bg-info" : "bg-warning text-dark")">
-                                            @(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Updating" : item.RequestStatus)
+                                            @LanguageCenter.Models.DisplayText.Status(item.RequestStatus)
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <a href="@Url.Action("EditConsultation", "Admin", new { id = item.ConsultationID })" class="btn btn-sm btn-outline-primary">Edit Status</a>
+                                        <a href="@Url.Action("EditConsultation", "Admin", new { id = item.ConsultationID })" class="btn btn-sm btn-outline-primary">Sửa trạng thái</a>
                                     </td>
                                 </tr>
                             }
@@ -122,10 +122,10 @@
 
                 if (Model.TotalPages > 1)
                 {
-                    <nav class="p-3" aria-label="Consultation pagination">
+                    <nav class="p-3" aria-label="Phân trang tư vấn">
                         <ul class="pagination justify-content-center mb-0">
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage - 1 })">Previous</a>
+                                <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage - 1 })">Trước</a>
                             </li>
                             @for (var i = 1; i <= Model.TotalPages; i++)
                             {
@@ -134,7 +134,7 @@
                                 </li>
                             }
                             <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage + 1 })">Next</a>
+                                <a class="page-link" href="@Url.Action("Consultations", "Admin", new { search = Model.Search, status = Model.Status, page = Model.CurrentPage + 1 })">Sau</a>
                             </li>
                         </ul>
                     </nav>
@@ -143,7 +143,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No consultations found.</div>
+                    <div class="alert alert-info mb-0">Không tìm thấy yêu cầu tư vấn.</div>
                 </div>
             }
         </div>

@@ -1,4 +1,4 @@
-namespace LanguageCenter.Models
+﻿namespace LanguageCenter.Models
 {
     public class AdminTeacherViewModel
     {

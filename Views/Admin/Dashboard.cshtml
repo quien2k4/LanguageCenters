@@ -1,17 +1,17 @@
-@model LanguageCenter.Models.AdminDashboardViewModel
+﻿@model LanguageCenter.Models.AdminDashboardViewModel
 
 @{
-    ViewBag.Title = "Admin Dashboard";
+    ViewBag.Title = "Bảng điều khiển quản trị";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Admin Dashboard</h2>
-            <p class="text-muted mb-0">Welcome, @Model.FullName</p>
+            <h2 class="fw-bold mb-1">Bảng điều khiển quản trị</h2>
+            <p class="text-muted mb-0">Xin chào, @Model.FullName</p>
         </div>
-        <div class="text-muted small">Account ID: @Model.AccountID</div>
+        <div class="text-muted small">Mã tài khoản: @Model.AccountID</div>
     </div>
 
     @if (TempData["Success"] != null)
@@ -28,7 +28,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Total Programs</div>
+                    <div class="text-muted small">Tổng chương trình</div>
                     <div class="display-6 fw-bold">@Model.TotalPrograms</div>
                 </div>
             </div>
@@ -36,7 +36,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Total Classes</div>
+                    <div class="text-muted small">Tổng lớp học</div>
                     <div class="display-6 fw-bold">@Model.TotalClasses</div>
                 </div>
             </div>
@@ -44,7 +44,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Total Students</div>
+                    <div class="text-muted small">Tổng học viên</div>
                     <div class="display-6 fw-bold">@Model.TotalStudents</div>
                 </div>
             </div>
@@ -52,7 +52,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Total Teachers</div>
+                    <div class="text-muted small">Tổng giáo viên</div>
                     <div class="display-6 fw-bold">@Model.TotalTeachers</div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Registrations</div>
+                    <div class="text-muted small">Đăng ký</div>
                     <div class="display-6 fw-bold">@Model.TotalRegistrations</div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Payments</div>
+                    <div class="text-muted small">Thanh toán</div>
                     <div class="display-6 fw-bold">@Model.TotalPayments</div>
                 </div>
             </div>
@@ -76,7 +76,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Placement Tests</div>
+                    <div class="text-muted small">Kiểm tra đầu vào</div>
                     <div class="display-6 fw-bold">@Model.TotalPlacementTests</div>
                 </div>
             </div>
@@ -84,7 +84,7 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Consultations</div>
+                    <div class="text-muted small">Tư vấn</div>
                     <div class="display-6 fw-bold">@Model.TotalConsultations</div>
                 </div>
             </div>
@@ -95,7 +95,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Total Revenue</div>
+                    <div class="text-muted small">Tổng doanh thu</div>
                     <div class="h2 fw-bold mb-0">@Model.TotalRevenue.ToString("N0")</div>
                 </div>
             </div>
@@ -103,7 +103,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Paid Payments</div>
+                    <div class="text-muted small">Thanh toán đã trả</div>
                     <div class="h2 fw-bold mb-0">@Model.PaidPayments</div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-                    <div class="text-muted small">Unpaid Payments</div>
+                    <div class="text-muted small">Thanh toán chưa trả</div>
                     <div class="h2 fw-bold mb-0">@Model.UnpaidPayments</div>
                 </div>
             </div>
@@ -120,7 +120,7 @@
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white">
-            <h5 class="mb-0">Recent Registrations</h5>
+            <h5 class="mb-0">Đăng ký gần đây</h5>
         </div>
         <div class="card-body p-0">
             @if (Model.RecentRegistrations.Any())
@@ -129,22 +129,22 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Student</th>
-                                <th>Class</th>
-                                <th>Program</th>
-                                <th>Registration Date</th>
-                                <th>Status</th>
+                                <th>Học viên</th>
+                                <th>Lớp</th>
+                                <th>Chương trình</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model.RecentRegistrations)
                             {
                                 <tr>
-                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Unknown student" : item.StudentName)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ClassName) ? "Updating" : item.ClassName)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Updating" : item.ProgramName)</td>
-                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
-                                    <td><span class="badge bg-info text-dark">@(string.IsNullOrWhiteSpace(item.RegStatus) ? "Updating" : item.RegStatus)</span></td>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Học viên chưa xác định" : item.StudentName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ClassName) ? "Đang cập nhật" : item.ClassName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Đang cập nhật" : item.ProgramName)</td>
+                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Đang cập nhật")</td>
+                                    <td><span class="badge bg-info text-dark">@LanguageCenter.Models.DisplayText.Status(item.RegStatus)</span></td>
                                 </tr>
                             }
                         </tbody>
@@ -154,7 +154,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No recent registrations available.</div>
+                    <div class="alert alert-info mb-0">Chưa có đăng ký gần đây.</div>
                 </div>
             }
         </div>
@@ -164,7 +164,7 @@
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Recent Payments</h5>
+                    <h5 class="mb-0">Thanh toán gần đây</h5>
                 </div>
                 <div class="card-body p-0">
                     @if (Model.RecentPayments.Any())
@@ -173,22 +173,22 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Student</th>
-                                        <th>Class</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Payment Date</th>
+                                        <th>Học viên</th>
+                                        <th>Lớp</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày thanh toán</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var item in Model.RecentPayments)
                                     {
                                         <tr>
-                                            <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Unknown student" : item.StudentName)</td>
-                                            <td>@(string.IsNullOrWhiteSpace(item.ClassName) ? "Updating" : item.ClassName)</td>
+                                            <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Học viên chưa xác định" : item.StudentName)</td>
+                                            <td>@(string.IsNullOrWhiteSpace(item.ClassName) ? "Đang cập nhật" : item.ClassName)</td>
                                             <td>@item.Amount.ToString("N0")</td>
-                                            <td><span class="badge @(item.PaymentStatus == "Paid" ? "bg-success" : item.PaymentStatus == "Unpaid" ? "bg-warning text-dark" : "bg-secondary")">@(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "Updating" : item.PaymentStatus)</span></td>
-                                            <td>@(item.PaymentDate.HasValue ? item.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
+                                            <td><span class="badge @(item.PaymentStatus == "Paid" ? "bg-success" : item.PaymentStatus == "Unpaid" ? "bg-warning text-dark" : "bg-secondary")">@LanguageCenter.Models.DisplayText.Status(item.PaymentStatus)</span></td>
+                                            <td>@(item.PaymentDate.HasValue ? item.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Đang cập nhật")</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -198,7 +198,7 @@
                     else
                     {
                         <div class="p-4">
-                            <div class="alert alert-info mb-0">No recent payments available.</div>
+                            <div class="alert alert-info mb-0">Chưa có thanh toán gần đây.</div>
                         </div>
                     }
                 </div>
@@ -208,7 +208,7 @@
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Recent Consultations</h5>
+                    <h5 class="mb-0">Tư vấn gần đây</h5>
                 </div>
                 <div class="card-body p-0">
                     @if (Model.RecentConsultations.Any())
@@ -217,10 +217,10 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Guest</th>
-                                        <th>Contact</th>
-                                        <th>Question</th>
-                                        <th>Status</th>
+                                        <th>Khách</th>
+                                        <th>Liên hệ</th>
+                                        <th>Câu hỏi</th>
+                                        <th>Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -230,7 +230,7 @@
                                             <td class="fw-semibold">@item.GuestName</td>
                                             <td>@item.ContactInformation</td>
                                             <td style="min-width: 240px;">@item.QuestionContent</td>
-                                            <td><span class="badge bg-warning text-dark">@(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Pending" : item.RequestStatus)</span></td>
+                                            <td><span class="badge bg-warning text-dark">@LanguageCenter.Models.DisplayText.Status(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Pending" : item.RequestStatus)</span></td>
                                         </tr>
                                     }
                                 </tbody>
@@ -240,7 +240,7 @@
                     else
                     {
                         <div class="p-4">
-                            <div class="alert alert-info mb-0">No recent consultations available.</div>
+                            <div class="alert alert-info mb-0">Chưa có tư vấn gần đây.</div>
                         </div>
                     }
                 </div>

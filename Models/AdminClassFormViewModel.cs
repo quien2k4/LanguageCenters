@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
@@ -10,35 +10,36 @@ namespace LanguageCenter.Models
         public int ClassID { get; set; }
 
         [Required]
-        [Display(Name = "Class Name")]
+        [Display(Name = "Tên lớp")]
         public string ClassName { get; set; }
 
         [Required]
-        [Display(Name = "Program")]
+        [Display(Name = "Chương trình")]
         public int? ProgramID { get; set; }
 
         [Required]
-        [Display(Name = "Teacher")]
+        [Display(Name = "Giáo viên")]
         public int? TeacherID { get; set; }
 
         [Required]
-        [Display(Name = "Status")]
+        [Display(Name = "Trạng thái")]
         public int? StatusID { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
-        [Display(Name = "Start Date")]
+        [Display(Name = "Ngày bắt đầu")]
         public DateTime? StartDate { get; set; }
 
-        [Display(Name = "Day Of Week")]
+        [Display(Name = "Thứ trong tuần")]
         public string DayOfWeek { get; set; }
 
-        [Display(Name = "Start Time")]
+        [Display(Name = "Giờ bắt đầu")]
         public string StartTime { get; set; }
 
-        [Display(Name = "End Time")]
+        [Display(Name = "Giờ kết thúc")]
         public string EndTime { get; set; }
 
+        [Display(Name = "Phòng")]
         public string Room { get; set; }
 
         public List<SelectListItem> Programs { get; set; }

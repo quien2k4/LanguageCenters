@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminTeacherViewModel
+﻿@model LanguageCenter.Models.AdminTeacherViewModel
 
 @{
-    ViewBag.Title = "Deactivate Teacher";
+    ViewBag.Title = "Ngừng hoạt động giáo viên";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var avatar = string.IsNullOrWhiteSpace(Model.Avatar)
         ? Url.Content("~/Content/Images/default-avatar.png")
@@ -13,11 +13,11 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0">Deactivate Teacher</h4>
+                    <h4 class="mb-0">Ngừng hoạt động giáo viên</h4>
                 </div>
                 <div class="card-body p-4">
                     <div class="alert alert-warning">
-                        This will set the teacher account to inactive. Existing classes will not be deleted.
+                        Thao tác này sẽ chuyển tài khoản giáo viên sang ngừng hoạt động. Các lớp hiện có sẽ không bị xóa.
                     </div>
 
                     <div class="d-flex gap-3 mb-4">
@@ -25,8 +25,8 @@
                         <div>
                             <h5 class="fw-bold mb-1">@Model.FullName</h5>
                             <div class="text-muted">@Model.Email</div>
-                            <div class="text-muted">Expertise: @(string.IsNullOrWhiteSpace(Model.Expertise) ? "Updating" : Model.Expertise)</div>
-                            <div class="text-muted">Classes: @Model.ClassCount</div>
+                            <div class="text-muted">Chuyên môn: @(string.IsNullOrWhiteSpace(Model.Expertise) ? "Đang cập nhật" : Model.Expertise)</div>
+                            <div class="text-muted">Lớp học: @Model.ClassCount</div>
                         </div>
                     </div>
 
@@ -34,8 +34,8 @@
                     {
                         @Html.AntiForgeryToken()
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-danger">Deactivate</button>
-                            <a href="@Url.Action("Teachers", "Admin")" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Ngừng hoạt động</button>
+                            <a href="@Url.Action("Teachers", "Admin")" class="btn btn-outline-secondary">Hủy</a>
                         </div>
                     }
                 </div>

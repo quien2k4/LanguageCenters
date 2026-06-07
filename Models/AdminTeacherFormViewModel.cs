@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenter.Models
 {
@@ -11,21 +11,23 @@ namespace LanguageCenter.Models
         [EmailAddress]
         public string Email { get; set; }
 
+        [Display(Name = "Mật khẩu")]
         public string Password { get; set; }
 
-        [Display(Name = "Confirm Password")]
+        [Display(Name = "Xác nhận mật khẩu")]
         public string ConfirmPassword { get; set; }
 
         [Required]
-        [Display(Name = "Full Name")]
+        [Display(Name = "Họ tên")]
         public string FullName { get; set; }
 
         [Required]
+        [Display(Name = "Chuyên môn")]
         public string Expertise { get; set; }
 
         public string Avatar { get; set; }
 
-        [Display(Name = "Active")]
+        [Display(Name = "Đang hoạt động")]
         public bool IsActive { get; set; }
     }
 }

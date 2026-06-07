@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenter.Models
@@ -11,14 +11,16 @@ namespace LanguageCenter.Models
         public string ClassName { get; set; }
         public string ProgramName { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Amount must be greater than or equal to 0.")]
+        [Range(0, double.MaxValue, ErrorMessage = "Số tiền phải lớn hơn hoặc bằng 0.")]
+        [Display(Name = "Số tiền")]
         public decimal Amount { get; set; }
 
         public DateTime? PaymentDate { get; set; }
+        [Display(Name = "Phương thức")]
         public string Method { get; set; }
 
         [Required]
-        [Display(Name = "Payment Status")]
+        [Display(Name = "Trạng thái thanh toán")]
         public string PaymentStatus { get; set; }
     }
 }

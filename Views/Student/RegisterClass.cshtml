@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.StudentRegisterClassViewModel
+﻿@model LanguageCenter.Models.StudentRegisterClassViewModel
 
 @{
-    ViewBag.Title = "Register Class";
+    ViewBag.Title = "Đăng ký lớp";
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Confirm Class Registration</h4>
+                    <h4 class="mb-0">Xác nhận đăng ký lớp</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -28,31 +28,31 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <div class="border rounded p-3 h-100">
-                                <div class="text-muted small">Program</div>
-                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ProgramName) ? "Updating" : Model.ProgramName)</div>
+                                <div class="text-muted small">Chương trình</div>
+                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ProgramName) ? "Đang cập nhật" : Model.ProgramName)</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="border rounded p-3 h-100">
-                                <div class="text-muted small">Teacher</div>
-                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.TeacherName) ? "Updating" : Model.TeacherName)</div>
+                                <div class="text-muted small">Giáo viên</div>
+                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.TeacherName) ? "Đang cập nhật" : Model.TeacherName)</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="border rounded p-3 h-100">
-                                <div class="text-muted small">Status</div>
-                                <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.StatusName) ? "Updating" : Model.StatusName)</div>
+                                <div class="text-muted small">Trạng thái</div>
+                                <div class="fw-semibold">@LanguageCenter.Models.DisplayText.Status(Model.StatusName)</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="border rounded p-3 h-100">
-                                <div class="text-muted small">Start Date</div>
-                                <div class="fw-semibold">@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</div>
+                                <div class="text-muted small">Ngày bắt đầu</div>
+                                <div class="fw-semibold">@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="border rounded p-3 h-100">
-                                <div class="text-muted small">Fee</div>
+                                <div class="text-muted small">Học phí</div>
                                 <div class="fw-semibold">@Model.Fee.ToString("N0")</div>
                             </div>
                         </div>
@@ -60,7 +60,7 @@
 
                     @if (Model.IsAlreadyRegistered)
                     {
-                        <div class="alert alert-warning">You already registered this class.</div>
+                        <div class="alert alert-warning">Bạn đã đăng ký lớp này.</div>
                     }
 
                     <div class="d-flex flex-wrap gap-2">
@@ -68,17 +68,17 @@
                         {
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-primary" @(Model.IsAlreadyRegistered ? "disabled" : "")>
-                                Confirm Register
+                                Xác nhận đăng ký
                             </button>
                         }
 
                         @if (Model.ProgramID > 0)
                         {
-                            <a href="@Url.Action("Detail", "Program", new { id = Model.ProgramID })" class="btn btn-outline-secondary">Back to Program Detail</a>
+                            <a href="@Url.Action("Detail", "Program", new { id = Model.ProgramID })" class="btn btn-outline-secondary">Quay lại chi tiết chương trình</a>
                         }
                         else
                         {
-                            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary">Back to Programs</a>
+                            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary">Quay lại chương trình</a>
                         }
                     </div>
                 </div>

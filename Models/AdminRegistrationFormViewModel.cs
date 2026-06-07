@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenter.Models
@@ -13,7 +13,7 @@ namespace LanguageCenter.Models
         public string PaymentStatus { get; set; }
 
         [Required]
-        [Display(Name = "Registration Status")]
+        [Display(Name = "Trạng thái đăng ký")]
         public string RegStatus { get; set; }
     }
 }

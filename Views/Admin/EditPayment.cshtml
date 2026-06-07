@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminPaymentFormViewModel
+﻿@model LanguageCenter.Models.AdminPaymentFormViewModel
 
 @{
-    ViewBag.Title = "Edit Payment";
+    ViewBag.Title = "Sửa thanh toán";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Edit Payment</h4>
+                    <h4 class="mb-0">Sửa thanh toán</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -19,23 +19,23 @@
                     }
 
                     <dl class="row mb-4">
-                        <dt class="col-sm-4">Payment ID</dt>
+                        <dt class="col-sm-4">Mã thanh toán</dt>
                         <dd class="col-sm-8">@Model.PaymentID</dd>
 
-                        <dt class="col-sm-4">Registration ID</dt>
+                        <dt class="col-sm-4">Mã đăng ký</dt>
                         <dd class="col-sm-8">@Model.RegistrationID</dd>
 
-                        <dt class="col-sm-4">Student</dt>
+                        <dt class="col-sm-4">Học viên</dt>
                         <dd class="col-sm-8">@Model.StudentName</dd>
 
-                        <dt class="col-sm-4">Class</dt>
+                        <dt class="col-sm-4">Lớp</dt>
                         <dd class="col-sm-8">@Model.ClassName</dd>
 
-                        <dt class="col-sm-4">Program</dt>
+                        <dt class="col-sm-4">Chương trình</dt>
                         <dd class="col-sm-8">@Model.ProgramName</dd>
 
-                        <dt class="col-sm-4">Payment Date</dt>
-                        <dd class="col-sm-8">@(Model.PaymentDate.HasValue ? Model.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Not paid yet")</dd>
+                        <dt class="col-sm-4">Ngày thanh toán</dt>
+                        <dd class="col-sm-8">@(Model.PaymentDate.HasValue ? Model.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa thanh toán")</dd>
                     </dl>
 
                     @using (Html.BeginForm("EditPayment", "Admin", FormMethod.Post))
@@ -52,11 +52,11 @@
                         <div class="mb-3">
                             @Html.LabelFor(model => model.Method, new { @class = "form-label" })
                             <select id="Method" name="Method" class="form-select">
-                                <option value="">Select method</option>
+                                <option value="">Chọn phương thức</option>
                                 <option value="Demo" @(Model.Method == "Demo" ? "selected" : "")>Demo</option>
-                                <option value="Cash" @(Model.Method == "Cash" ? "selected" : "")>Cash</option>
-                                <option value="Bank Transfer" @(Model.Method == "Bank Transfer" ? "selected" : "")>Bank Transfer</option>
-                                <option value="Online" @(Model.Method == "Online" ? "selected" : "")>Online</option>
+                                <option value="Cash" @(Model.Method == "Cash" ? "selected" : "")>Tiền mặt</option>
+                                <option value="Bank Transfer" @(Model.Method == "Bank Transfer" ? "selected" : "")>Chuyển khoản ngân hàng</option>
+                                <option value="Online" @(Model.Method == "Online" ? "selected" : "")>Trực tuyến</option>
                             </select>
                             @Html.ValidationMessageFor(model => model.Method, "", new { @class = "text-danger" })
                         </div>
@@ -64,17 +64,17 @@
                         <div class="mb-3">
                             @Html.LabelFor(model => model.PaymentStatus, new { @class = "form-label" })
                             <select id="PaymentStatus" name="PaymentStatus" class="form-select">
-                                <option value="Unpaid" @(Model.PaymentStatus == "Unpaid" ? "selected" : "")>Unpaid</option>
-                                <option value="Paid" @(Model.PaymentStatus == "Paid" ? "selected" : "")>Paid</option>
-                                <option value="Failed" @(Model.PaymentStatus == "Failed" ? "selected" : "")>Failed</option>
-                                <option value="Refunded" @(Model.PaymentStatus == "Refunded" ? "selected" : "")>Refunded</option>
+                                <option value="Unpaid" @(Model.PaymentStatus == "Unpaid" ? "selected" : "")>Chưa thanh toán</option>
+                                <option value="Paid" @(Model.PaymentStatus == "Paid" ? "selected" : "")>Đã thanh toán</option>
+                                <option value="Failed" @(Model.PaymentStatus == "Failed" ? "selected" : "")>Thất bại</option>
+                                <option value="Refunded" @(Model.PaymentStatus == "Refunded" ? "selected" : "")>Đã hoàn tiền</option>
                             </select>
                             @Html.ValidationMessageFor(model => model.PaymentStatus, "", new { @class = "text-danger" })
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            <a href="@Url.Action("Payments", "Admin")" class="btn btn-outline-secondary">Back to Payments</a>
+                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            <a href="@Url.Action("Payments", "Admin")" class="btn btn-outline-secondary">Quay lại thanh toán</a>
                         </div>
                     }
                 </div>

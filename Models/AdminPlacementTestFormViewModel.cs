@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenter.Models
@@ -12,18 +12,22 @@ namespace LanguageCenter.Models
 
         [Required]
         [DataType(DataType.Date)]
+        [Display(Name = "Ngày kiểm tra")]
         public DateTime? TestDate { get; set; }
 
         [Required]
+        [Display(Name = "Giờ kiểm tra")]
         public string TestTime { get; set; }
 
         [Required]
+        [Display(Name = "Trình độ")]
         public string Level { get; set; }
 
-        [Display(Name = "Result Score")]
+        [Display(Name = "Điểm kết quả")]
         public string ResultScore { get; set; }
 
         [Required]
+        [Display(Name = "Trạng thái")]
         public string Status { get; set; }
     }
 }

@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminTeacherFormViewModel
+﻿@model LanguageCenter.Models.AdminTeacherFormViewModel
 
 @{
-    ViewBag.Title = "Create Teacher";
+    ViewBag.Title = "Thêm giáo viên";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Create Teacher</h4>
+                    <h4 class="mb-0">Thêm giáo viên</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -55,14 +55,14 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <label for="avatarFile" class="form-label">Avatar Upload</label>
+                                <label for="avatarFile" class="form-label">Tải ảnh đại diện</label>
                                 <input type="file" id="avatarFile" name="avatarFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
                             </div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">Create</button>
-                            <a href="@Url.Action("Teachers", "Admin")" class="btn btn-outline-secondary">Back to Teachers</a>
+                            <button type="submit" class="btn btn-primary">Thêm mới</button>
+                            <a href="@Url.Action("Teachers", "Admin")" class="btn btn-outline-secondary">Quay lại giáo viên</a>
                         </div>
                     }
                 </div>

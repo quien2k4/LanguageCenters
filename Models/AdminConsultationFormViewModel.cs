@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenter.Models
 {
@@ -10,7 +10,7 @@ namespace LanguageCenter.Models
         public string QuestionContent { get; set; }
 
         [Required]
-        [Display(Name = "Request Status")]
+        [Display(Name = "Trạng thái yêu cầu")]
         public string RequestStatus { get; set; }
     }
 }

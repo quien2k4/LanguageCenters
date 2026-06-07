@@ -9,6 +9,15 @@
     font-weight: bold;
 }
 
+.navbar-nav {
+    align-items: center;
+    gap: 6px;
+}
+
+.public-dashboard-link {
+    font-weight: 700;
+}
+
 .hero-section {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: white;
@@ -52,4 +61,16 @@
     background-color: #0f172a;
     color: white;
     padding: 25px 0;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-nav {
+        align-items: stretch;
+        gap: 8px;
+        padding-top: 12px;
+    }
+
+    .navbar-nav .btn {
+        width: 100%;
+    }
 }

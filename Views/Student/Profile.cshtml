@@ -1,32 +1,32 @@
-@{
-    ViewBag.Title = "Student Profile";
+﻿@{
+    ViewBag.Title = "Hồ sơ học viên";
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-success text-white">
-            <h4 class="mb-0">Student Profile</h4>
+            <h4 class="mb-0">Hồ sơ học viên</h4>
         </div>
         <div class="card-body">
-            <p class="text-muted mb-4">Welcome to the temporary student profile page.</p>
+            <p class="text-muted mb-4">Thông tin tài khoản học viên của bạn.</p>
 
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Full Name</div>
+                        <div class="text-muted small">Họ tên</div>
                         <div class="fw-semibold">@ViewBag.FullName</div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Role</div>
-                        <div class="fw-semibold">@ViewBag.Role</div>
+                        <div class="text-muted small">Vai trò</div>
+                        <div class="fw-semibold">Học viên</div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Account ID</div>
+                        <div class="text-muted small">Mã tài khoản</div>
                         <div class="fw-semibold">@ViewBag.AccountID</div>
                     </div>
                 </div>

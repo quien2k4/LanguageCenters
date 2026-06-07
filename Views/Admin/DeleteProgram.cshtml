@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminProgramViewModel
+﻿@model LanguageCenter.Models.AdminProgramViewModel
 
 @{
-    ViewBag.Title = "Deactivate Program";
+    ViewBag.Title = "Ngừng hoạt động chương trình";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var imageUrl = string.IsNullOrWhiteSpace(Model.ImageURL)
         ? Url.Content("~/Content/Images/default-program.jpg")
@@ -13,20 +13,20 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0">Deactivate Program</h4>
+                    <h4 class="mb-0">Ngừng hoạt động chương trình</h4>
                 </div>
                 <div class="card-body p-4">
                     <div class="alert alert-warning">
-                        This action will set the program to inactive. It will not be deleted from the database.
+                        Thao tác này sẽ chuyển chương trình sang trạng thái ngừng hoạt động. Dữ liệu sẽ không bị xóa khỏi database.
                     </div>
 
                     <div class="d-flex gap-3 mb-4">
                         <img src="@imageUrl" alt="@Model.ProgramName" class="rounded border" style="width: 140px; height: 96px; object-fit: cover;" />
                         <div>
                             <h5 class="fw-bold mb-1">@Model.ProgramName</h5>
-                            <div class="text-muted">Level: @(string.IsNullOrWhiteSpace(Model.Level) ? "Updating" : Model.Level)</div>
-                            <div class="text-muted">Duration: @(string.IsNullOrWhiteSpace(Model.Duration) ? "Updating" : Model.Duration)</div>
-                            <div class="text-muted">Fee: @Model.Fee.ToString("N0")</div>
+                            <div class="text-muted">Trình độ: @(string.IsNullOrWhiteSpace(Model.Level) ? "Đang cập nhật" : Model.Level)</div>
+                            <div class="text-muted">Thời lượng: @(string.IsNullOrWhiteSpace(Model.Duration) ? "Đang cập nhật" : Model.Duration)</div>
+                            <div class="text-muted">Học phí: @Model.Fee.ToString("N0")</div>
                         </div>
                     </div>
 
@@ -34,8 +34,8 @@
                     {
                         @Html.AntiForgeryToken()
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-danger">Deactivate</button>
-                            <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Ngừng hoạt động</button>
+                            <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Hủy</a>
                         </div>
                     }
                 </div>

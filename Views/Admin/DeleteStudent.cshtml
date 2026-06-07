@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminStudentViewModel
+﻿@model LanguageCenter.Models.AdminStudentViewModel
 
 @{
-    ViewBag.Title = "Deactivate Student";
+    ViewBag.Title = "Ngừng hoạt động học viên";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var avatar = string.IsNullOrWhiteSpace(Model.Avatar)
         ? Url.Content("~/Content/Images/default-avatar.png")
@@ -13,7 +13,7 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0">Deactivate Student</h4>
+                    <h4 class="mb-0">Ngừng hoạt động học viên</h4>
                 </div>
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
@@ -25,23 +25,23 @@
                     </div>
 
                     <div class="alert alert-warning">
-                        This action will only set the student account to inactive. Registrations, payments, and placement tests will not be deleted.
+                        Thao tác này chỉ chuyển tài khoản học viên sang ngừng hoạt động. Đăng ký, thanh toán và bài kiểm tra đầu vào sẽ không bị xóa.
                     </div>
 
                     <dl class="row mb-4">
-                        <dt class="col-sm-4">Student ID</dt>
+                        <dt class="col-sm-4">Mã học viên</dt>
                         <dd class="col-sm-8">@Model.StudentID</dd>
 
-                        <dt class="col-sm-4">Phone</dt>
+                        <dt class="col-sm-4">Số điện thoại</dt>
                         <dd class="col-sm-8">@Model.PhoneNumber</dd>
 
-                        <dt class="col-sm-4">Registrations</dt>
+                        <dt class="col-sm-4">Đăng ký</dt>
                         <dd class="col-sm-8">@Model.RegistrationCount</dd>
 
-                        <dt class="col-sm-4">Payments</dt>
+                        <dt class="col-sm-4">Thanh toán</dt>
                         <dd class="col-sm-8">@Model.PaymentCount</dd>
 
-                        <dt class="col-sm-4">Placement Tests</dt>
+                        <dt class="col-sm-4">Kiểm tra đầu vào</dt>
                         <dd class="col-sm-8">@Model.PlacementTestCount</dd>
                     </dl>
 
@@ -49,8 +49,8 @@
                     {
                         @Html.AntiForgeryToken()
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-danger">Deactivate</button>
-                            <a href="@Url.Action("Students", "Admin")" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Ngừng hoạt động</button>
+                            <a href="@Url.Action("Students", "Admin")" class="btn btn-outline-secondary">Hủy</a>
                         </div>
                     }
                 </div>

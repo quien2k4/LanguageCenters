@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminPlacementTestFormViewModel
+﻿@model LanguageCenter.Models.AdminPlacementTestFormViewModel
 
 @{
-    ViewBag.Title = "Edit Placement Test";
+    ViewBag.Title = "Sửa kiểm tra đầu vào";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Edit Placement Test</h4>
+                    <h4 class="mb-0">Sửa kiểm tra đầu vào</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -19,20 +19,20 @@
                     }
 
                     <dl class="row mb-4">
-                        <dt class="col-sm-4">Test ID</dt>
+                        <dt class="col-sm-4">Mã kiểm tra</dt>
                         <dd class="col-sm-8">@Model.TestID</dd>
 
-                        <dt class="col-sm-4">Student</dt>
+                        <dt class="col-sm-4">Học viên</dt>
                         <dd class="col-sm-8">@Model.StudentName</dd>
 
                         <dt class="col-sm-4">Email</dt>
                         <dd class="col-sm-8">@Model.StudentEmail</dd>
 
-                        <dt class="col-sm-4">Phone</dt>
+                        <dt class="col-sm-4">Số điện thoại</dt>
                         <dd class="col-sm-8">@Model.PhoneNumber</dd>
 
-                        <dt class="col-sm-4">Current Result</dt>
-                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.ResultScore) ? "Not updated yet" : Model.ResultScore)</dd>
+                        <dt class="col-sm-4">Kết quả hiện tại</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.ResultScore) ? "Chưa cập nhật" : Model.ResultScore)</dd>
                     </dl>
 
                     @using (Html.BeginForm("EditPlacementTest", "Admin", FormMethod.Post))
@@ -64,17 +64,17 @@
                             <div class="col-12">
                                 @Html.LabelFor(model => model.Status, new { @class = "form-label" })
                                 <select id="Status" name="Status" class="form-select">
-                                    <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Pending</option>
-                                    <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Completed</option>
-                                    <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Cancelled</option>
+                                    <option value="Pending" @(Model.Status == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                                    <option value="Completed" @(Model.Status == "Completed" ? "selected" : "")>Hoàn thành</option>
+                                    <option value="Cancelled" @(Model.Status == "Cancelled" ? "selected" : "")>Đã hủy</option>
                                 </select>
                                 @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
                             </div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            <a href="@Url.Action("PlacementTests", "Admin")" class="btn btn-outline-secondary">Back to Placement Tests</a>
+                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            <a href="@Url.Action("PlacementTests", "Admin")" class="btn btn-outline-secondary">Quay lại kiểm tra đầu vào</a>
                         </div>
                     }
                 </div>

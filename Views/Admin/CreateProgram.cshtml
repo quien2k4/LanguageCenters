@@ -1,7 +1,7 @@
-@model LanguageCenter.Models.AdminProgramViewModel
+﻿@model LanguageCenter.Models.AdminProgramViewModel
 
 @{
-    ViewBag.Title = "Create Program";
+    ViewBag.Title = "Thêm chương trình";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -10,7 +10,7 @@
         <div class="col-lg-9">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Create Program</h4>
+                    <h4 class="mb-0">Thêm chương trình</h4>
                 </div>
                 <div class="card-body p-4">
                     @if (TempData["Error"] != null)
@@ -44,7 +44,7 @@
                                 @Html.ValidationMessageFor(model => model.Fee, "", new { @class = "text-danger" })
                             </div>
                             <div class="col-md-4">
-                                <label for="imageFile" class="form-label">Image Upload</label>
+                                <label for="imageFile" class="form-label">Tải ảnh lên</label>
                                 <input type="file" id="imageFile" name="imageFile" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
@@ -64,8 +64,8 @@
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">Create</button>
-                            <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Back to Programs</a>
+                            <button type="submit" class="btn btn-primary">Thêm mới</button>
+                            <a href="@Url.Action("Programs", "Admin")" class="btn btn-outline-secondary">Quay lại chương trình</a>
                         </div>
                     }
                 </div>

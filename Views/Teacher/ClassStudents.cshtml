@@ -1,17 +1,17 @@
-@model LanguageCenter.Models.TeacherClassStudentsViewModel
+﻿@model LanguageCenter.Models.TeacherClassStudentsViewModel
 
 @{
-    ViewBag.Title = "Class Students";
+    ViewBag.Title = "Học viên trong lớp";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
 
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Class Students</h2>
-            <p class="text-muted mb-0">Students registered in this class.</p>
+            <h2 class="fw-bold mb-1">Học viên trong lớp</h2>
+            <p class="text-muted mb-0">Danh sách học viên đã đăng ký lớp này.</p>
         </div>
-        <a href="@Url.Action("MyClasses", "Teacher")" class="btn btn-outline-primary">Back to My Classes</a>
+        <a href="@Url.Action("MyClasses", "Teacher")" class="btn btn-outline-primary">Quay lại lớp của tôi</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -32,26 +32,26 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Class ID</div>
+                        <div class="text-muted small">Mã lớp</div>
                         <div class="fw-semibold">@Model.ClassID</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Program</div>
-                        <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ProgramName) ? "Updating" : Model.ProgramName)</div>
+                        <div class="text-muted small">Chương trình</div>
+                        <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ProgramName) ? "Đang cập nhật" : Model.ProgramName)</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Start Date</div>
-                        <div class="fw-semibold">@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</div>
+                        <div class="text-muted small">Ngày bắt đầu</div>
+                        <div class="fw-semibold">@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Class Status</div>
-                        <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ClassStatus) ? "Updating" : Model.ClassStatus)</div>
+                        <div class="text-muted small">Trạng thái lớp</div>
+                        <div class="fw-semibold">@LanguageCenter.Models.DisplayText.Status(Model.ClassStatus)</div>
                     </div>
                 </div>
             </div>
@@ -66,13 +66,13 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Student ID</th>
-                                <th>Student Name</th>
-                                <th>Phone Number</th>
-                                <th>Registration Date</th>
-                                <th>Registration Status</th>
-                                <th>Payment Status</th>
-                                <th>Latest Attendance</th>
+                                <th>Mã học viên</th>
+                                <th>Tên học viên</th>
+                                <th>Số điện thoại</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái đăng ký</th>
+                                <th>Trạng thái thanh toán</th>
+                                <th>Điểm danh gần nhất</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -80,15 +80,15 @@
                             {
                                 <tr>
                                     <td>@item.StudentID</td>
-                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Unknown student" : item.StudentName)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Updating" : item.PhoneNumber)</td>
-                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Updating")</td>
+                                    <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.StudentName) ? "Học viên chưa xác định" : item.StudentName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.PhoneNumber) ? "Đang cập nhật" : item.PhoneNumber)</td>
+                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Đang cập nhật")</td>
                                     <td>
-                                        <span class="badge bg-info text-dark">@(string.IsNullOrWhiteSpace(item.RegistrationStatus) ? "Updating" : item.RegistrationStatus)</span>
+                                        <span class="badge bg-info text-dark">@LanguageCenter.Models.DisplayText.Status(item.RegistrationStatus)</span>
                                     </td>
                                     <td>
                                         <span class="badge @(item.PaymentStatus == "Paid" ? "bg-success" : item.PaymentStatus == "Unpaid" ? "bg-warning text-dark" : "bg-secondary")">
-                                            @(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "No payment" : item.PaymentStatus)
+                                            @LanguageCenter.Models.DisplayText.Status(string.IsNullOrWhiteSpace(item.PaymentStatus) ? "No payment" : item.PaymentStatus)
                                         </span>
                                     </td>
                                     <td>@item.LatestAttendanceStatus</td>
@@ -101,7 +101,7 @@
             else
             {
                 <div class="p-4">
-                    <div class="alert alert-info mb-0">No students registered in this class yet.</div>
+                    <div class="alert alert-info mb-0">Chưa có học viên đăng ký lớp này.</div>
                 </div>
             }
         </div>

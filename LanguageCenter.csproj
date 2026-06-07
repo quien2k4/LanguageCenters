@@ -161,11 +161,13 @@
     <Compile Include="Models\AdminTeacherFormViewModel.cs" />
     <Compile Include="Models\AdminTeacherPageViewModel.cs" />
     <Compile Include="Models\AdminTeacherViewModel.cs" />
+    <Compile Include="Models\ForgotPasswordViewModel.cs" />
     <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\DisplayText.cs" />
     <Compile Include="Models\PaymentResultViewModel.cs" />
     <Compile Include="Models\ProgramDetailViewModel.cs" />
     <Compile Include="Models\ProgramListViewModel.cs" />
+    <Compile Include="Models\ResetPasswordViewModel.cs" />
     <Compile Include="Models\StudentConsultationsViewModel.cs" />
     <Compile Include="Models\StudentMyClassViewModel.cs" />
     <Compile Include="Models\StudentPaymentViewModel.cs" />
@@ -254,6 +256,8 @@
     <Content Include="Views\TestLayout\Admin.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Account\ForgotPassword.cshtml" />
+    <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\Programs.cshtml" />
     <Content Include="Views\Admin\CreateProgram.cshtml" />

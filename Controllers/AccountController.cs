@@ -141,10 +141,141 @@ namespace LanguageCenter.Controllers
             return RedirectToAction("Login");
         }
 
+        [HttpGet]
+        public ActionResult ForgotPassword()
+        {
+            return View(new ForgotPasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Vui lòng nhập email tài khoản.";
+                return View(model);
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                string errorMessage;
+                var email = (model.Email ?? string.Empty).Trim();
+                var account = GetPasswordResetAccount(db, email, out errorMessage);
+
+                if (account == null)
+                {
+                    TempData["Error"] = errorMessage;
+                    return View(model);
+                }
+
+                return RedirectToAction("ResetPassword", "Account", new { email = account.Email });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ResetPassword(string email)
+        {
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                string errorMessage;
+                var account = GetPasswordResetAccount(db, email, out errorMessage);
+
+                if (account == null)
+                {
+                    TempData["Error"] = errorMessage;
+                    return RedirectToAction("ForgotPassword", "Account");
+                }
+
+                return View(new ResetPasswordViewModel { Email = account.Email });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ResetPassword(ResetPasswordViewModel model)
+        {
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "Xác nhận mật khẩu không khớp.");
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                string errorMessage;
+                var account = GetPasswordResetAccount(db, model.Email, out errorMessage);
+
+                if (account == null)
+                {
+                    TempData["Error"] = errorMessage;
+                    return RedirectToAction("ForgotPassword", "Account");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Vui lòng kiểm tra thông tin đổi mật khẩu.";
+                    model.Email = account.Email;
+                    return View(model);
+                }
+
+                account.PasswordHash = model.NewPassword;
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Password reset successfully. Please login again.";
+            return RedirectToAction("Login", "Account");
+        }
+
         public ActionResult Logout()
         {
             Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+
+        private static USER_ACCOUNT GetPasswordResetAccount(LanguageCenterDataContext db, string email, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            email = (email ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                errorMessage = "Vui lòng nhập email tài khoản.";
+                return null;
+            }
+
+            var account = db.USER_ACCOUNTs.FirstOrDefault(x => x.Email == email);
+            if (account == null)
+            {
+                errorMessage = "Email không tồn tại.";
+                return null;
+            }
+
+            var role = (account.Role ?? string.Empty).Trim();
+            if (role == "Admin")
+            {
+                errorMessage = "Admin account cannot reset password here. Please contact system owner.";
+                return null;
+            }
+
+            if (role != "Student" && role != "Teacher")
+            {
+                errorMessage = "Tài khoản này không được phép đặt lại mật khẩu tại đây.";
+                return null;
+            }
+
+            if (account.IsActive != true)
+            {
+                errorMessage = "Tài khoản chưa được kích hoạt.";
+                return null;
+            }
+
+            if (account.IsLockedOut == true)
+            {
+                errorMessage = "Tài khoản đã bị khóa.";
+                return null;
+            }
+
+            return account;
         }
 
         private static string GetFullName(LanguageCenterDataContext db, USER_ACCOUNT account)

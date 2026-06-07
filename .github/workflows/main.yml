@@ -2,7 +2,7 @@ name: Tự động Deploy lên SmarterASP
 
 on:
   push:
-    branches: [ "master", "main" ] # Sẽ tự động kích hoạt khi có code mới đẩy lên nhánh master hoặc main
+    branches: [ "master", "main" ]
 
 jobs:
   build-and-deploy:
@@ -20,9 +20,9 @@ jobs:
 
     - name: Tải các thư viện (Restore Packages)
       run: nuget restore LanguageCenter.slnx
-
+      
     - name: Biên dịch và Đóng gói code (Build)
-      run: msbuild LanguageCenter.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="${{ github.workspace }}\publish_output"
+      run: msbuild LanguageCenter.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="publish_output"
 
     - name: Upload code lên SmarterASP qua FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -31,4 +31,4 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish_output/
-        server-dir: /site1/ # Thư mục gốc chứa web của bạn
+        server-dir: /site1/

@@ -19,10 +19,10 @@ jobs:
       uses: NuGet/setup-nuget@v2
 
     - name: Tải các thư viện (Restore Packages)
-      run: nuget restore LanguageCenter.sln 
+      run: nuget restore LanguageCenter.slnx
 
     - name: Biên dịch và Đóng gói code (Build)
-      run: msbuild LanguageCenter.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="${{ github.workspace }}\publish_output"
+      run: msbuild LanguageCenter.slnx /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:publishUrl="${{ github.workspace }}\publish_output"
 
     - name: Upload code lên SmarterASP qua FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4

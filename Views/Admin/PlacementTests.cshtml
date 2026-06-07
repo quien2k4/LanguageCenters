@@ -48,7 +48,7 @@
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            @using (Html.BeginForm("PlacementTests", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            @using (Html.BeginForm("PlacementTests", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
                 <div class="col-lg-4 col-md-6">
                     <label for="search" class="form-label">Search</label>
@@ -74,7 +74,10 @@
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-6">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <div class="admin-filter-actions">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="@Url.Action("PlacementTests", "Admin")" class="btn btn-outline-secondary">Reset</a>
+                    </div>
                 </div>
             }
         </div>

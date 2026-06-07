@@ -76,6 +76,10 @@
     padding: 28px;
 }
 
+.content .container {
+    max-width: 100%;
+}
+
 .user-box {
     display: flex;
     align-items: center;
@@ -106,6 +110,115 @@
     border: 1px solid #e5e7eb;
 }
 
+.card {
+    border-radius: 8px;
+}
+
+.card > .card-body.p-0 {
+    overflow: hidden;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive > .table {
+    min-width: max-content;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.table td {
+    color: #111827;
+}
+
+.table .text-wrap-cell {
+    min-width: 220px;
+    max-width: 420px;
+    white-space: normal;
+}
+
+.badge {
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+    padding: 7px 10px;
+    border: 1px solid transparent;
+}
+
+.badge.bg-success {
+    background-color: #15803d !important;
+    color: #ffffff !important;
+    border-color: #166534;
+}
+
+.badge.bg-secondary {
+    background-color: #475569 !important;
+    color: #ffffff !important;
+    border-color: #334155;
+}
+
+.badge.bg-danger {
+    background-color: #b91c1c !important;
+    color: #ffffff !important;
+    border-color: #991b1b;
+}
+
+.badge.bg-warning {
+    background-color: #f59e0b !important;
+    color: #111827 !important;
+    border-color: #d97706;
+}
+
+.badge.bg-info {
+    background-color: #0891b2 !important;
+    color: #ffffff !important;
+    border-color: #0e7490;
+}
+
+.admin-page-header,
+.admin-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-page-header {
+    justify-content: space-between;
+}
+
+.admin-filter-form .form-control,
+.admin-filter-form .form-select {
+    max-width: none;
+    width: 100%;
+}
+
+.admin-filter-actions {
+    justify-content: flex-end;
+}
+
+.admin-filter-actions .btn {
+    min-width: 96px;
+}
+
+.sidebar-menu li a.sidebar-home-link {
+    color: #86efac;
+    font-weight: 700;
+}
+
+.sidebar-menu li a.sidebar-home-link:hover {
+    background-color: #14532d;
+    color: #ffffff;
+}
+
 @media (max-width: 768px) {
     .dashboard-wrapper {
         flex-direction: column;
@@ -125,5 +238,29 @@
 
     .content {
         padding: 15px;
+    }
+
+    .content .container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .admin-page-header {
+        align-items: stretch;
+    }
+
+    .admin-page-header > .btn,
+    .admin-filter-actions,
+    .admin-filter-actions .btn {
+        width: 100%;
+    }
+
+    .admin-filter-actions {
+        justify-content: stretch;
+    }
+
+    .table th,
+    .table td {
+        font-size: 14px;
     }
 }

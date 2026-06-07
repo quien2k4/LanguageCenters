@@ -56,7 +56,7 @@
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            @using (Html.BeginForm("Consultations", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            @using (Html.BeginForm("Consultations", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
                 <div class="col-md-7">
                     <label for="search" class="form-label">Search</label>
@@ -73,7 +73,10 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <div class="admin-filter-actions">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="@Url.Action("Consultations", "Admin")" class="btn btn-outline-secondary">Reset</a>
+                    </div>
                 </div>
             }
         </div>
@@ -102,7 +105,7 @@
                                     <td>@item.ConsultationID</td>
                                     <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.GuestName) ? "Updating" : item.GuestName)</td>
                                     <td>@(string.IsNullOrWhiteSpace(item.ContactInformation) ? "Updating" : item.ContactInformation)</td>
-                                    <td style="max-width: 420px; white-space: normal;">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "No question" : item.QuestionContent)</td>
+                                    <td class="text-wrap-cell">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "No question" : item.QuestionContent)</td>
                                     <td>
                                         <span class="badge @(item.RequestStatus == "Completed" ? "bg-success" : item.RequestStatus == "Cancelled" ? "bg-danger" : item.RequestStatus == "Processing" ? "bg-info" : "bg-warning text-dark")">
                                             @(string.IsNullOrWhiteSpace(item.RequestStatus) ? "Updating" : item.RequestStatus)

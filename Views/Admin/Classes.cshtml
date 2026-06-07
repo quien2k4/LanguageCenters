@@ -6,12 +6,11 @@
 }
 
 <div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div class="admin-page-header mb-4">
         <div>
             <h2 class="fw-bold mb-1">Manage Classes</h2>
             <p class="text-muted mb-0">Create, update, and change class status.</p>
         </div>
-        <a href="@Url.Action("CreateClass", "Admin")" class="btn btn-primary">Create Class</a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -26,26 +25,30 @@
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            @using (Html.BeginForm("Classes", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            @using (Html.BeginForm("Classes", "Admin", FormMethod.Get, new { @class = "row g-3 align-items-end admin-filter-form" }))
             {
-                <div class="col-md-3">
+                <div class="col-lg-2 col-md-6">
                     <label for="search" class="form-label">Search</label>
                     <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Class or program" />
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-3 col-md-6">
                     <label for="programId" class="form-label">Program</label>
                     @Html.DropDownList("programId", Model.Programs, "All programs", new { @class = "form-select" })
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-3 col-md-6">
                     <label for="teacherId" class="form-label">Teacher</label>
                     @Html.DropDownList("teacherId", Model.Teachers, "All teachers", new { @class = "form-select" })
                 </div>
-                <div class="col-md-2">
+                <div class="col-lg-2 col-md-6">
                     <label for="statusId" class="form-label">Status</label>
                     @Html.DropDownList("statusId", Model.Statuses, "All statuses", new { @class = "form-select" })
                 </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary w-100">Go</button>
+                <div class="col-lg-2 col-md-12">
+                    <div class="admin-filter-actions">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="@Url.Action("Classes", "Admin")" class="btn btn-outline-secondary">Reset</a>
+                        <a href="@Url.Action("CreateClass", "Admin")" class="btn btn-success">Create</a>
+                    </div>
                 </div>
             }
         </div>
@@ -81,7 +84,7 @@
                                     <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Updating" : item.TeacherName)</td>
                                     <td><span class="badge bg-secondary">@(string.IsNullOrWhiteSpace(item.StatusName) ? "Updating" : item.StatusName)</span></td>
                                     <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Updating")</td>
-                                    <td style="min-width: 220px; white-space: pre-line;">@item.Schedule</td>
+                                    <td class="text-wrap-cell" style="white-space: pre-line;">@item.Schedule</td>
                                     <td>@item.Room</td>
                                     <td>@item.StudentCount</td>
                                     <td class="text-end">

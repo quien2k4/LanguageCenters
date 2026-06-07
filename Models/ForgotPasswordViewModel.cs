@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenter.Models
 {
@@ -9,3 +9,4 @@ namespace LanguageCenter.Models
         public string Email { get; set; }
     }
 }
+

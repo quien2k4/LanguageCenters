@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Configuration;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
+using LanguageCenter.Helpers;
 using LanguageCenter.Models;
 
 namespace LanguageCenter.Controllers
@@ -14,22 +17,183 @@ namespace LanguageCenter.Controllers
 
         public new ActionResult Profile()
         {
-            if (Session["AccountID"] == null || Session["Role"] == null)
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
             {
-                return RedirectToAction("Login", "Account");
+                return authResult;
             }
 
-            if (Session["Role"].ToString() != "Student")
+            using (var db = new LanguageCenterDataContext(connectionString))
             {
-                TempData["Error"] = "You do not have permission to access this page.";
-                return RedirectToAction("Index", "Home");
+                var student = GetCurrentStudent(db);
+                var account = GetCurrentAccount(db);
+
+                if (student == null || account == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var model = new StudentProfileViewModel
+                {
+                    AccountID = account.AccountID,
+                    StudentID = student.StudentID,
+                    Email = account.Email,
+                    FullName = student.FullName,
+                    DateOfBirth = student.DateOfBirth,
+                    PhoneNumber = student.PhoneNumber,
+                    Avatar = account.Avatar
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult EditProfile()
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
             }
 
-            ViewBag.FullName = Session["FullName"] != null ? Session["FullName"].ToString() : string.Empty;
-            ViewBag.Role = Session["Role"].ToString();
-            ViewBag.AccountID = Session["AccountID"].ToString();
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                var account = GetCurrentAccount(db);
 
-            return View();
+                if (student == null || account == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var model = new EditStudentProfileViewModel
+                {
+                    StudentID = student.StudentID,
+                    Email = account.Email,
+                    FullName = student.FullName,
+                    DateOfBirth = student.DateOfBirth,
+                    PhoneNumber = student.PhoneNumber,
+                    Avatar = account.Avatar
+                };
+
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditProfile(EditStudentProfileViewModel model, HttpPostedFileBase avatarFile)
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                var account = GetCurrentAccount(db);
+
+                if (student == null || account == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                model.StudentID = student.StudentID;
+                model.Email = account.Email;
+                model.Avatar = account.Avatar;
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Vui lòng kiểm tra thông tin hồ sơ.";
+                    return View(model);
+                }
+
+                var avatarUrl = SaveAvatarImage(avatarFile);
+                if (avatarFile != null && avatarFile.ContentLength > 0 && avatarUrl == null)
+                {
+                    TempData["Error"] = "Ảnh đại diện không hợp lệ. Vui lòng chọn file jpg, jpeg, png, gif hoặc webp.";
+                    return View(model);
+                }
+
+                student.FullName = (model.FullName ?? string.Empty).Trim();
+                student.DateOfBirth = model.DateOfBirth;
+                student.PhoneNumber = (model.PhoneNumber ?? string.Empty).Trim();
+
+                if (!string.IsNullOrWhiteSpace(avatarUrl))
+                {
+                    account.Avatar = avatarUrl;
+                }
+
+                db.SubmitChanges();
+
+                Session["FullName"] = student.FullName;
+                Session["Avatar"] = account.Avatar;
+            }
+
+            TempData["Success"] = "Cập nhật hồ sơ thành công.";
+            return RedirectToAction("Profile", "Student");
+        }
+
+        [HttpGet]
+        public ActionResult ChangePassword()
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            return View(new ChangePasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "Xác nhận mật khẩu không khớp.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Vui lòng kiểm tra thông tin đổi mật khẩu.";
+                return View(model);
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var account = GetCurrentAccount(db);
+                if (account == null)
+                {
+                    TempData["Error"] = "Student account not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                if (!PasswordHelper.VerifyPassword(model.CurrentPassword, account.PasswordHash))
+                {
+                    TempData["Error"] = "Mật khẩu hiện tại không đúng.";
+                    return View(model);
+                }
+
+                account.PasswordHash = PasswordHelper.HashPassword(model.NewPassword);
+                db.SubmitChanges();
+            }
+
+            TempData["Success"] = "Đổi mật khẩu thành công.";
+            return RedirectToAction("Profile", "Student");
         }
 
         [HttpGet]
@@ -554,18 +718,7 @@ namespace LanguageCenter.Controllers
 
         private ActionResult CheckStudentPermission()
         {
-            if (Session["AccountID"] == null || Session["Role"] == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (Session["Role"].ToString() != "Student")
-            {
-                TempData["Error"] = "You do not have permission to access this page.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            return null;
+            return AuthHelper.RequireRole(this, "Student");
         }
 
         private STUDENT GetCurrentStudent(LanguageCenterDataContext db)
@@ -588,6 +741,43 @@ namespace LanguageCenter.Controllers
             }
 
             return db.USER_ACCOUNTs.FirstOrDefault(a => a.AccountID == accountId);
+        }
+
+        private string SaveAvatarImage(HttpPostedFileBase avatarFile)
+        {
+            if (avatarFile == null || avatarFile.ContentLength <= 0)
+            {
+                return null;
+            }
+
+            var extension = Path.GetExtension(avatarFile.FileName);
+            if (!IsAllowedAvatarExtension(extension))
+            {
+                return null;
+            }
+
+            var uploadFolder = Server.MapPath("~/Content/Uploads/Avatars");
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+            }
+
+            var fileName = string.Format("{0}_{1}{2}", DateTime.Now.Ticks, Guid.NewGuid().ToString("N"), extension);
+            var physicalPath = Path.Combine(uploadFolder, fileName);
+            avatarFile.SaveAs(physicalPath);
+
+            return "/Content/Uploads/Avatars/" + fileName;
+        }
+
+        private static bool IsAllowedAvatarExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                return false;
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            return allowedExtensions.Contains(extension.ToLower());
         }
 
         private StudentRegisterClassViewModel GetClassInfo(LanguageCenterDataContext db, int classId)
@@ -645,3 +835,5 @@ namespace LanguageCenter.Controllers
         }
     }
 }
+
+

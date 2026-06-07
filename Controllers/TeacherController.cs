@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using LanguageCenter.Helpers;
 using LanguageCenter.Models;
 
 namespace LanguageCenter.Controllers
@@ -16,15 +17,10 @@ namespace LanguageCenter.Controllers
 
         public ActionResult Dashboard()
         {
-            if (Session["AccountID"] == null || Session["Role"] == null)
+            var authResult = CheckTeacherPermission();
+            if (authResult != null)
             {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (Session["Role"].ToString() != "Teacher")
-            {
-                TempData["Error"] = "You do not have permission to access this page.";
-                return RedirectToAction("Index", "Home");
+                return authResult;
             }
 
             int accountId;
@@ -706,18 +702,7 @@ namespace LanguageCenter.Controllers
 
         private ActionResult CheckTeacherPermission()
         {
-            if (Session["AccountID"] == null || Session["Role"] == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (Session["Role"].ToString() != "Teacher")
-            {
-                TempData["Error"] = "You do not have permission to access this page.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            return null;
+            return AuthHelper.RequireRole(this, "Teacher");
         }
 
         private TEACHER GetCurrentTeacher(LanguageCenterDataContext db)
@@ -825,3 +810,4 @@ namespace LanguageCenter.Controllers
         }
     }
 }
+

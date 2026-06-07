@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using LanguageCenter.Helpers;
 using LanguageCenter.Models;
 
 namespace LanguageCenter.Controllers
@@ -15,15 +16,10 @@ namespace LanguageCenter.Controllers
 
         public ActionResult Dashboard()
         {
-            if (Session["AccountID"] == null || Session["Role"] == null)
+            var authResult = CheckAdminPermission();
+            if (authResult != null)
             {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (Session["Role"].ToString() != "Admin")
-            {
-                TempData["Error"] = "You do not have permission to access this page.";
-                return RedirectToAction("Index", "Home");
+                return authResult;
             }
 
             int accountId;
@@ -888,7 +884,7 @@ namespace LanguageCenter.Controllers
                 var account = new USER_ACCOUNT
                 {
                     Email = email,
-                    PasswordHash = model.Password,
+                    PasswordHash = PasswordHelper.HashPassword(model.Password),
                     Role = "Teacher",
                     Avatar = avatarUrl,
                     IsActive = model.IsActive,
@@ -947,7 +943,9 @@ namespace LanguageCenter.Controllers
                     FullName = teacher.FullName,
                     Expertise = teacher.Expertise,
                     Avatar = account.Avatar,
-                    IsActive = account.IsActive == true
+                    IsActive = account.IsActive == true,
+                    IsLockedOut = account.IsLockedOut == true,
+                    FailedLoginAttempts = account.FailedLoginAttempts ?? 0
                 };
 
                 return View(model);
@@ -990,6 +988,8 @@ namespace LanguageCenter.Controllers
                 {
                     TempData["Error"] = "Please check teacher information.";
                     model.Avatar = account.Avatar;
+                    model.IsLockedOut = account.IsLockedOut == true;
+                    model.FailedLoginAttempts = account.FailedLoginAttempts ?? 0;
                     return View(model);
                 }
 
@@ -998,11 +998,18 @@ namespace LanguageCenter.Controllers
                 {
                     TempData["Error"] = "Invalid avatar type. Please upload jpg, jpeg, png, gif, or webp.";
                     model.Avatar = account.Avatar;
+                    model.IsLockedOut = account.IsLockedOut == true;
+                    model.FailedLoginAttempts = account.FailedLoginAttempts ?? 0;
                     return View(model);
                 }
 
                 account.Email = email;
                 account.IsActive = model.IsActive;
+                if (model.UnlockAccount)
+                {
+                    account.IsLockedOut = false;
+                    account.FailedLoginAttempts = 0;
+                }
                 if (!string.IsNullOrWhiteSpace(avatarUrl))
                 {
                     account.Avatar = avatarUrl;
@@ -1233,7 +1240,7 @@ namespace LanguageCenter.Controllers
                 var account = new USER_ACCOUNT
                 {
                     Email = email,
-                    PasswordHash = model.Password,
+                    PasswordHash = PasswordHelper.HashPassword(model.Password),
                     Role = "Student",
                     Avatar = avatarUrl,
                     IsActive = model.IsActive,
@@ -1294,7 +1301,9 @@ namespace LanguageCenter.Controllers
                     DateOfBirth = student.DateOfBirth,
                     PhoneNumber = student.PhoneNumber,
                     Avatar = account.Avatar,
-                    IsActive = account.IsActive == true
+                    IsActive = account.IsActive == true,
+                    IsLockedOut = account.IsLockedOut == true,
+                    FailedLoginAttempts = account.FailedLoginAttempts ?? 0
                 };
 
                 return View(model);
@@ -1337,6 +1346,8 @@ namespace LanguageCenter.Controllers
                 {
                     TempData["Error"] = "Please check student information.";
                     model.Avatar = account.Avatar;
+                    model.IsLockedOut = account.IsLockedOut == true;
+                    model.FailedLoginAttempts = account.FailedLoginAttempts ?? 0;
                     return View(model);
                 }
 
@@ -1345,11 +1356,18 @@ namespace LanguageCenter.Controllers
                 {
                     TempData["Error"] = "Invalid avatar type. Please upload jpg, jpeg, png, gif, or webp.";
                     model.Avatar = account.Avatar;
+                    model.IsLockedOut = account.IsLockedOut == true;
+                    model.FailedLoginAttempts = account.FailedLoginAttempts ?? 0;
                     return View(model);
                 }
 
                 account.Email = email;
                 account.IsActive = model.IsActive;
+                if (model.UnlockAccount)
+                {
+                    account.IsLockedOut = false;
+                    account.FailedLoginAttempts = 0;
+                }
                 if (!string.IsNullOrWhiteSpace(avatarUrl))
                 {
                     account.Avatar = avatarUrl;
@@ -2308,18 +2326,7 @@ namespace LanguageCenter.Controllers
 
         private ActionResult CheckAdminPermission()
         {
-            if (Session["AccountID"] == null || Session["Role"] == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (Session["Role"].ToString() != "Admin")
-            {
-                TempData["Error"] = "You do not have permission to access this page.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            return null;
+            return AuthHelper.RequireRole(this, "Admin");
         }
 
         private string SaveProgramImage(HttpPostedFileBase imageFile)
@@ -2532,3 +2539,4 @@ namespace LanguageCenter.Controllers
         }
     }
 }
+

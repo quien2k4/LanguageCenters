@@ -34,5 +34,14 @@ namespace LanguageCenter.Models
 
         [Display(Name = "Đang hoạt động")]
         public bool IsActive { get; set; }
+
+        [Display(Name = "Đang bị khóa")]
+        public bool IsLockedOut { get; set; }
+
+        public int FailedLoginAttempts { get; set; }
+
+        [Display(Name = "Mở khóa tài khoản")]
+        public bool UnlockAccount { get; set; }
     }
 }
+

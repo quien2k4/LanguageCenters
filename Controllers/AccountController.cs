@@ -3,6 +3,7 @@ using System.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Mvc;
+using LanguageCenter.Helpers;
 using LanguageCenter.Models;
 
 namespace LanguageCenter.Controllers
@@ -35,7 +36,7 @@ namespace LanguageCenter.Controllers
 
                 if (account == null)
                 {
-                    TempData["Error"] = "Email không tồn tại.";
+                    TempData["Error"] = "Email hoặc mật khẩu không đúng.";
                     return View(model);
                 }
 
@@ -51,13 +52,33 @@ namespace LanguageCenter.Controllers
                     return View(model);
                 }
 
-                if (account.PasswordHash != model.Password)
+                if (!PasswordHelper.VerifyPassword(model.Password, account.PasswordHash))
                 {
-                    TempData["Error"] = "Mật khẩu không đúng.";
+                    var failedAttempts = (account.FailedLoginAttempts ?? 0) + 1;
+                    account.FailedLoginAttempts = failedAttempts;
+
+                    if (failedAttempts >= 5)
+                    {
+                        account.IsLockedOut = true;
+                        db.SubmitChanges();
+                        TempData["Error"] = "Tài khoản đã bị khóa do nhập sai mật khẩu quá nhiều lần.";
+                        return View(model);
+                    }
+
+                    db.SubmitChanges();
+                    TempData["Error"] = "Email hoặc mật khẩu không đúng. Số lần thử còn lại: " + (5 - failedAttempts);
                     return View(model);
                 }
 
+                account.FailedLoginAttempts = 0;
+                if (!PasswordHelper.IsHashedPassword(account.PasswordHash))
+                {
+                    account.PasswordHash = PasswordHelper.HashPassword(model.Password);
+                }
+                db.SubmitChanges();
+
                 Session["AccountID"] = account.AccountID;
+                Session["Email"] = account.Email;
                 Session["Role"] = account.Role;
                 Session["FullName"] = GetFullName(db, account);
                 Session["Avatar"] = account.Avatar;
@@ -116,7 +137,7 @@ namespace LanguageCenter.Controllers
                 var account = new USER_ACCOUNT
                 {
                     Email = email,
-                    PasswordHash = model.Password,
+                    PasswordHash = PasswordHelper.HashPassword(model.Password),
                     Role = "Student",
                     Avatar = null,
                     IsActive = true,
@@ -218,7 +239,7 @@ namespace LanguageCenter.Controllers
                     return View(model);
                 }
 
-                account.PasswordHash = model.NewPassword;
+                account.PasswordHash = PasswordHelper.HashPassword(model.NewPassword);
                 db.SubmitChanges();
             }
 
@@ -340,3 +361,5 @@ namespace LanguageCenter.Controllers
         public string PhoneNumber { get; set; }
     }
 }
+
+

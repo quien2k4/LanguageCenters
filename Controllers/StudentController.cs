@@ -308,7 +308,7 @@ namespace LanguageCenter.Controllers
                 db.SubmitChanges();
             }
 
-            TempData["Success"] = "Register class successfully. Payment status is Unpaid.";
+            TempData["Success"] = "Đăng ký lớp thành công. Trạng thái đăng ký là Chờ mở lớp và thanh toán là Chưa thanh toán.";
             return RedirectToAction("MyClasses", "Student");
         }
 
@@ -383,8 +383,84 @@ namespace LanguageCenter.Controllers
 
                 var model = new StudentMyClassesViewModel
                 {
-                    Classes = classes
+                    Classes = classes,
+                    TotalClasses = classes.Count,
+                    OngoingClasses = classes.Count(c => (c.ClassStatus ?? string.Empty).Trim() == "Ongoing"),
+                    UpcomingClasses = classes.Count(c => (c.ClassStatus ?? string.Empty).Trim() == "Upcoming"),
+                    UnpaidPayments = classes.Count(c => (c.PaymentStatus ?? string.Empty).Trim() == "Unpaid")
                 };
+
+                return View(model);
+            }
+        }
+
+        public ActionResult ClassDetail(int registrationId)
+        {
+            var authResult = CheckStudentPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var student = GetCurrentStudent(db);
+                if (student == null)
+                {
+                    TempData["Error"] = "Student profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var model = (
+                    from r in db.REGISTRATIONs
+                    join c in db.CLASSes on r.ClassID equals c.ClassID
+                    join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                    from p in programJoin.DefaultIfEmpty()
+                    join t in db.TEACHERs on c.TeacherID equals t.TeacherID into teacherJoin
+                    from t in teacherJoin.DefaultIfEmpty()
+                    join s in db.CLASS_STATUS on c.StatusID equals s.StatusID into statusJoin
+                    from s in statusJoin.DefaultIfEmpty()
+                    join pay in db.PAYMENTs on r.RegistrationID equals pay.RegistrationID into paymentJoin
+                    from pay in paymentJoin.DefaultIfEmpty()
+                    where r.RegistrationID == registrationId && r.StudentID == student.StudentID
+                    select new StudentClassDetailViewModel
+                    {
+                        RegistrationID = r.RegistrationID,
+                        ClassID = c.ClassID,
+                        ClassName = c.ClassName,
+                        ProgramName = p != null ? p.ProgramName : string.Empty,
+                        TeacherName = t != null ? t.FullName : string.Empty,
+                        ClassStatus = s != null ? s.StatusName : string.Empty,
+                        StartDate = c.StartDate,
+                        RegistrationDate = r.RegistrationDate,
+                        RegStatus = r.RegStatus,
+                        HasPayment = pay != null,
+                        Amount = pay != null ? pay.Amount : 0,
+                        PaymentStatus = pay != null ? pay.PaymentStatus : string.Empty,
+                        Method = pay != null ? pay.Method : string.Empty,
+                        PaymentDate = pay != null ? pay.PaymentDate : null,
+                        Schedule = string.Empty,
+                        Room = string.Empty
+                    })
+                    .FirstOrDefault();
+
+                if (model == null)
+                {
+                    TempData["Error"] = "Bạn không có quyền xem thông tin đăng ký này.";
+                    return RedirectToAction("MyClasses", "Student");
+                }
+
+                var classIds = new List<int> { model.ClassID };
+                var schedules = db.CLASS_SCHEDULEs
+                    .Where(x => classIds.Contains(x.ClassID))
+                    .OrderBy(x => x.ClassID)
+                    .ThenBy(x => x.ScheduleID)
+                    .ToList()
+                    .GroupBy(x => x.ClassID)
+                    .ToDictionary(x => x.Key, x => x.ToList());
+
+                model.Schedule = BuildScheduleText(schedules, model.ClassID);
+                model.Room = BuildRoomText(schedules, model.ClassID);
 
                 return View(model);
             }
@@ -631,14 +707,30 @@ namespace LanguageCenter.Controllers
                         x.GuestName == fullName ||
                         x.ContactInformation == phoneNumber ||
                         x.ContactInformation == email)
-                    .OrderByDescending(x => x.ConsultationID)
+                    .Select(x => new
+                    {
+                        Consultation = x,
+                        ClassName = x.ClassID.HasValue
+                            ? db.CLASSes.Where(c => c.ClassID == x.ClassID.Value).Select(c => c.ClassName).FirstOrDefault()
+                            : null,
+                        ProgramName = x.ClassID.HasValue
+                            ? (from c in db.CLASSes
+                               join p in db.PROGRAMs on c.ProgramID equals p.ProgramID
+                               where c.ClassID == x.ClassID.Value
+                               select p.ProgramName).FirstOrDefault()
+                            : null
+                    })
+                    .OrderByDescending(x => x.Consultation.ConsultationID)
                     .Select(x => new StudentConsultationViewModel
                     {
-                        ConsultationID = x.ConsultationID,
-                        GuestName = x.GuestName,
-                        ContactInformation = x.ContactInformation,
-                        QuestionContent = x.QuestionContent,
-                        RequestStatus = x.RequestStatus
+                        ConsultationID = x.Consultation.ConsultationID,
+                        ClassID = x.Consultation.ClassID,
+                        ClassName = x.ClassName,
+                        ProgramName = x.ProgramName,
+                        GuestName = x.Consultation.GuestName,
+                        ContactInformation = x.Consultation.ContactInformation,
+                        QuestionContent = x.Consultation.QuestionContent,
+                        RequestStatus = x.Consultation.RequestStatus
                     })
                     .ToList();
 
@@ -652,7 +744,7 @@ namespace LanguageCenter.Controllers
         }
 
         [HttpGet]
-        public ActionResult CreateConsultation()
+        public ActionResult CreateConsultation(int? classId)
         {
             var authResult = CheckStudentPermission();
             if (authResult != null)
@@ -674,9 +766,24 @@ namespace LanguageCenter.Controllers
                     ? student.PhoneNumber
                     : account != null ? account.Email : string.Empty;
 
+                var registeredClasses = GetRegisteredClassSelectList(db, student.StudentID, classId);
+                if (!registeredClasses.Any())
+                {
+                    TempData["Error"] = "Bạn cần đăng ký lớp trước khi gửi yêu cầu tư vấn theo lớp.";
+                    return RedirectToAction("Consultation", "Student");
+                }
+
+                if (classId.HasValue && !registeredClasses.Any(x => x.Value == classId.Value.ToString()))
+                {
+                    TempData["Error"] = "Bạn chỉ được gửi tư vấn cho lớp mình đã đăng ký.";
+                    return RedirectToAction("MyClasses", "Student");
+                }
+
                 var model = new CreateConsultationViewModel
                 {
-                    ContactInformation = defaultContact
+                    ClassID = classId,
+                    ContactInformation = defaultContact,
+                    Classes = registeredClasses
                 };
 
                 return View(model);
@@ -693,12 +800,6 @@ namespace LanguageCenter.Controllers
                 return authResult;
             }
 
-            if (!ModelState.IsValid)
-            {
-                TempData["Error"] = "Please enter contact information and question content.";
-                return View(model);
-            }
-
             using (var db = new LanguageCenterDataContext(connectionString))
             {
                 var student = GetCurrentStudent(db);
@@ -708,8 +809,22 @@ namespace LanguageCenter.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
+                model.Classes = GetRegisteredClassSelectList(db, student.StudentID, model.ClassID);
+
+                if (!model.ClassID.HasValue || !IsStudentRegisteredInClass(db, student.StudentID, model.ClassID.Value))
+                {
+                    ModelState.AddModelError("ClassID", "Bạn chỉ được chọn lớp mình đã đăng ký.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Please enter class, contact information and question content.";
+                    return View(model);
+                }
+
                 var consultation = new CONSULTATION
                 {
+                    ClassID = model.ClassID,
                     GuestName = student.FullName ?? string.Empty,
                     ContactInformation = (model.ContactInformation ?? string.Empty).Trim(),
                     QuestionContent = (model.QuestionContent ?? string.Empty).Trim(),
@@ -817,7 +932,7 @@ namespace LanguageCenter.Controllers
         {
             if (!schedules.ContainsKey(classId) || !schedules[classId].Any())
             {
-                return "No schedule";
+                return "Chưa có lịch học.";
             }
 
             var items = schedules[classId].Select(x =>
@@ -830,7 +945,7 @@ namespace LanguageCenter.Controllers
         {
             if (!schedules.ContainsKey(classId) || !schedules[classId].Any())
             {
-                return "No room";
+                return "Chưa có phòng.";
             }
 
             var rooms = schedules[classId]
@@ -839,10 +954,43 @@ namespace LanguageCenter.Controllers
                 .Distinct()
                 .ToList();
 
-            return rooms.Any() ? string.Join(", ", rooms) : "No room";
+            return rooms.Any() ? string.Join(", ", rooms) : "Chưa có phòng.";
+        }
+
+        private static List<SelectListItem> GetRegisteredClassSelectList(LanguageCenterDataContext db, int studentId, int? selectedClassId)
+        {
+            return (
+                from r in db.REGISTRATIONs
+                join c in db.CLASSes on r.ClassID equals c.ClassID
+                join p in db.PROGRAMs on c.ProgramID equals p.ProgramID into programJoin
+                from p in programJoin.DefaultIfEmpty()
+                where r.StudentID == studentId
+                orderby c.StartDate descending, c.ClassName
+                select new
+                {
+                    c.ClassID,
+                    c.ClassName,
+                    ProgramName = p != null ? p.ProgramName : string.Empty
+                })
+                .ToList()
+                .Select(x => new SelectListItem
+                {
+                    Value = x.ClassID.ToString(),
+                    Text = string.IsNullOrWhiteSpace(x.ProgramName)
+                        ? x.ClassName
+                        : x.ClassName + " - " + x.ProgramName,
+                    Selected = selectedClassId.HasValue && selectedClassId.Value == x.ClassID
+                })
+                .ToList();
+        }
+
+        private static bool IsStudentRegisteredInClass(LanguageCenterDataContext db, int studentId, int classId)
+        {
+            return db.REGISTRATIONs.Any(r => r.StudentID == studentId && r.ClassID == classId);
         }
     }
 }
+
 
 
 

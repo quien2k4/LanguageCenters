@@ -56,6 +56,7 @@
   <Table Name="dbo.CONSULTATION" Member="CONSULTATIONs">
     <Type Name="CONSULTATION">
       <Column Name="ConsultationID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ClassID" Type="System.Int32" DbType="Int" CanBeNull="true" />
       <Column Name="GuestName" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
       <Column Name="ContactInformation" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
       <Column Name="QuestionContent" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />

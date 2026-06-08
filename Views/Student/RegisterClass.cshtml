@@ -62,6 +62,12 @@
                     {
                         <div class="alert alert-warning">Bạn đã đăng ký lớp này.</div>
                     }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            Bạn có thể đăng ký lớp này ngay cả khi lớp sắp khai giảng hoặc đang chờ đủ học viên. Sau khi đăng ký, trạng thái của bạn sẽ là <strong>Chờ mở lớp</strong>.
+                        </div>
+                    }
 
                     <div class="d-flex flex-wrap gap-2">
                         @using (Html.BeginForm("RegisterClassConfirm", "Student", new { classId = Model.ClassID }, FormMethod.Post))

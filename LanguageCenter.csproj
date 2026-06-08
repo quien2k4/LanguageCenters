@@ -174,6 +174,7 @@
     <Compile Include="Models\ChangePasswordViewModel.cs" />
     <Compile Include="Models\EditStudentProfileViewModel.cs" />
     <Compile Include="Models\StudentConsultationsViewModel.cs" />
+    <Compile Include="Models\StudentClassDetailViewModel.cs" />
     <Compile Include="Models\StudentMyClassViewModel.cs" />
     <Compile Include="Models\StudentPaymentViewModel.cs" />
     <Compile Include="Models\StudentPlacementTestsViewModel.cs" />
@@ -183,6 +184,7 @@
     <Compile Include="Models\TeacherDashboardViewModel.cs" />
     <Compile Include="Models\TeacherMaterialsViewModel.cs" />
     <Compile Include="Models\TeacherMyClassViewModel.cs" />
+    <Compile Include="Models\TeacherConsultationViewModel.cs" />
     <Compile Include="Models\TeacherPlacementResultViewModel.cs" />
     <Compile Include="Models\TeacherPlacementResultsPageViewModel.cs" />
     <Compile Include="Models\TeacherStudentFeedbackPageViewModel.cs" />
@@ -293,12 +295,14 @@
     <Content Include="Views\Teacher\ClassStudents.cshtml" />
     <Content Include="Views\Teacher\Materials.cshtml" />
     <Content Include="Views\Teacher\MyClasses.cshtml" />
+    <Content Include="Views\Teacher\Consultations.cshtml" />
     <Content Include="Views\Teacher\PlacementResults.cshtml" />
     <Content Include="Views\Teacher\StudentFeedback.cshtml" />
     <Content Include="Views\Student\Profile.cshtml" />
     <Content Include="Views\Student\EditProfile.cshtml" />
     <Content Include="Views\Student\ChangePassword.cshtml" />
     <Content Include="Views\Student\MyClasses.cshtml" />
+    <Content Include="Views\Student\ClassDetail.cshtml" />
     <Content Include="Views\Student\Payments.cshtml" />
     <Content Include="Views\Student\RegisterClass.cshtml" />
     <Content Include="Views\Student\Consultation.cshtml" />

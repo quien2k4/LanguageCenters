@@ -33,6 +33,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Mã tư vấn</th>
+                                <th>Lớp liên quan</th>
                                 <th>Họ tên</th>
                                 <th>Thông tin liên hệ</th>
                                 <th>Nội dung câu hỏi</th>
@@ -44,6 +45,10 @@
                             {
                                 <tr>
                                     <td>@item.ConsultationID</td>
+                                    <td>
+                                        <div class="fw-semibold">@(string.IsNullOrWhiteSpace(item.ClassName) ? "Chưa liên kết lớp" : item.ClassName)</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(item.ProgramName) ? "" : item.ProgramName)</div>
+                                    </td>
                                     <td>@item.GuestName</td>
                                     <td>@item.ContactInformation</td>
                                     <td style="min-width: 260px;">@item.QuestionContent</td>

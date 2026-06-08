@@ -5,11 +5,64 @@
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
+@functions {
+    private static string StatusText(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Upcoming":
+                return "Sắp khai giảng";
+            case "Ongoing":
+                return "Đang học";
+            case "Completed":
+                return "Hoàn thành";
+            case "Cancelled":
+                return "Đã hủy";
+            default:
+                return LanguageCenter.Models.DisplayText.Status(value);
+        }
+    }
+
+    private static string RegistrationStatusText(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Pending":
+                return "Chờ mở lớp";
+            default:
+                return StatusText(value);
+        }
+    }
+
+    private static string StatusBadgeClass(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Upcoming":
+            case "Approved":
+            case "Confirmed":
+                return "bg-success";
+            case "Ongoing":
+                return "bg-info";
+            case "Pending":
+            case "Unpaid":
+                return "bg-warning text-dark";
+            case "Completed":
+            case "Paid":
+                return "bg-primary";
+            case "Cancelled":
+                return "bg-danger";
+            default:
+                return "bg-secondary";
+        }
+    }
+}
+
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Lớp học của tôi</h2>
-            <p class="text-muted mb-0">Các lớp bạn đã đăng ký.</p>
+            <p class="text-muted mb-0">Theo dõi các lớp đã đăng ký và xem chi tiết khi cần.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="@Url.Action("Payments", "Student")" class="btn btn-outline-primary">Xem thanh toán</a>
@@ -17,15 +70,40 @@
         </div>
     </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Tổng lớp</div>
+                    <h3 class="fw-bold mb-0">@Model.TotalClasses</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Đang học</div>
+                    <h3 class="fw-bold mb-0">@Model.OngoingClasses</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Sắp khai giảng</div>
+                    <h3 class="fw-bold mb-0">@Model.UpcomingClasses</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="text-muted small">Chưa thanh toán</div>
+                    <h3 class="fw-bold mb-0">@Model.UnpaidPayments</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
@@ -35,41 +113,36 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Mã đăng ký</th>
                                 <th>Lớp</th>
                                 <th>Chương trình</th>
                                 <th>Giáo viên</th>
-                                <th>Trạng thái lớp</th>
-                                <th>Ngày bắt đầu</th>
                                 <th>Lịch học</th>
-                                <th>Phòng</th>
-                                <th>Ngày đăng ký</th>
-                                <th>Trạng thái đăng ký</th>
-                                <th>Số tiền</th>
-                                <th>Trạng thái thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model.Classes)
                             {
                                 <tr>
-                                    <td>@item.RegistrationID</td>
                                     <td class="fw-semibold">@item.ClassName</td>
                                     <td>@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Đang cập nhật" : item.ProgramName)</td>
                                     <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Đang cập nhật" : item.TeacherName)</td>
-                                    <td>@LanguageCenter.Models.DisplayText.Status(item.ClassStatus)</td>
-                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</td>
-                                    <td style="min-width: 220px;">@item.Schedule</td>
-                                    <td>@item.Room</td>
-                                    <td>@(item.RegistrationDate.HasValue ? item.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Đang cập nhật")</td>
+                                    <td class="text-wrap-cell">@(string.IsNullOrWhiteSpace(item.Schedule) ? "Chưa có lịch học." : item.Schedule)</td>
                                     <td>
-                                        <span class="badge bg-info text-dark">@LanguageCenter.Models.DisplayText.Status(item.RegStatus)</span>
+                                        <div class="d-flex flex-column gap-1">
+                                            <span class="badge @StatusBadgeClass(item.ClassStatus)">@StatusText(item.ClassStatus)</span>
+                                            <span class="badge @StatusBadgeClass(item.RegStatus)">@RegistrationStatusText(item.RegStatus)</span>
+                                        </div>
                                     </td>
-                                    <td>@item.Amount.ToString("N0")</td>
-                                    <td>
-                                        <span class="badge @(item.PaymentStatus == "Unpaid" ? "bg-warning text-dark" : "bg-success")">
-                                            @LanguageCenter.Models.DisplayText.Status(item.PaymentStatus)
-                                        </span>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="@Url.Action("ClassDetail", "Student", new { registrationId = item.RegistrationID })" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                            @if ((item.PaymentStatus ?? string.Empty).Trim() == "Unpaid")
+                                            {
+                                                <a href="@Url.Action("Payments", "Student")" class="btn btn-sm btn-warning">Thanh toán</a>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -86,3 +159,4 @@
         </div>
     </div>
 </div>
+

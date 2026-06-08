@@ -5,6 +5,19 @@
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
+@functions {
+    private static string RegistrationStatusText(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Pending":
+                return "Chờ mở lớp";
+            default:
+                return LanguageCenter.Models.DisplayText.Status(value);
+        }
+    }
+}
+
 <div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
@@ -72,7 +85,7 @@
                                             <span class="badge bg-secondary">@LanguageCenter.Models.DisplayText.Status(item.PaymentStatus)</span>
                                         }
                                     </td>
-                                    <td>@LanguageCenter.Models.DisplayText.Status(item.RegistrationStatus)</td>
+                                    <td>@RegistrationStatusText(item.RegistrationStatus)</td>
                                     <td class="text-end">
                                         @if (isUnpaid)
                                         {

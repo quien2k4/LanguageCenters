@@ -25,6 +25,12 @@
                         <dt class="col-sm-4">Tên khách</dt>
                         <dd class="col-sm-8">@Model.GuestName</dd>
 
+                        <dt class="col-sm-4">Lớp liên quan</dt>
+                        <dd class="col-sm-8">
+                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.ClassName) ? "Chưa liên kết lớp" : Model.ClassName)</div>
+                            <div class="text-muted small">@(string.IsNullOrWhiteSpace(Model.ProgramName) ? "" : Model.ProgramName)</div>
+                        </dd>
+
                         <dt class="col-sm-4">Liên hệ</dt>
                         <dd class="col-sm-8">@Model.ContactInformation</dd>
 

@@ -1,24 +1,21 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace LanguageCenter.Models
 {
-    public class StudentConsultationsViewModel
+    public class TeacherConsultationsViewModel
     {
-        public List<StudentConsultationViewModel> Consultations { get; set; }
+        public List<TeacherConsultationViewModel> Consultations { get; set; }
 
-        public StudentConsultationsViewModel()
+        public TeacherConsultationsViewModel()
         {
-            Consultations = new List<StudentConsultationViewModel>();
+            Consultations = new List<TeacherConsultationViewModel>();
         }
     }
 
-    public class StudentConsultationViewModel
+    public class TeacherConsultationViewModel
     {
         public int ConsultationID { get; set; }
-        public int? ClassID { get; set; }
+        public int ClassID { get; set; }
         public string ClassName { get; set; }
         public string ProgramName { get; set; }
         public string GuestName { get; set; }

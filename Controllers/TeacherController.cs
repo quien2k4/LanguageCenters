@@ -700,6 +700,52 @@ namespace LanguageCenter.Controllers
             }
         }
 
+        public ActionResult Consultations()
+        {
+            var authResult = CheckTeacherPermission();
+            if (authResult != null)
+            {
+                return authResult;
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var teacher = GetCurrentTeacher(db);
+                if (teacher == null)
+                {
+                    TempData["Error"] = "Teacher profile not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var consultations = (
+                    from consultation in db.CONSULTATIONs
+                    join cls in db.CLASSes on consultation.ClassID equals cls.ClassID
+                    join program in db.PROGRAMs on cls.ProgramID equals program.ProgramID into programJoin
+                    from program in programJoin.DefaultIfEmpty()
+                    where cls.TeacherID == teacher.TeacherID
+                    orderby consultation.ConsultationID descending
+                    select new TeacherConsultationViewModel
+                    {
+                        ConsultationID = consultation.ConsultationID,
+                        ClassID = cls.ClassID,
+                        ClassName = cls.ClassName,
+                        ProgramName = program != null ? program.ProgramName : string.Empty,
+                        GuestName = consultation.GuestName,
+                        ContactInformation = consultation.ContactInformation,
+                        QuestionContent = consultation.QuestionContent,
+                        RequestStatus = consultation.RequestStatus
+                    })
+                    .ToList();
+
+                var model = new TeacherConsultationsViewModel
+                {
+                    Consultations = consultations
+                };
+
+                return View(model);
+            }
+        }
+
         private ActionResult CheckTeacherPermission()
         {
             return AuthHelper.RequireRole(this, "Teacher");

@@ -1,0 +1,160 @@
+﻿@model LanguageCenter.Models.StudentClassDetailViewModel
+
+@{
+    ViewBag.Title = "Chi tiết lớp học";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+@functions {
+    private static string StatusText(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Upcoming":
+                return "Sắp khai giảng";
+            case "Ongoing":
+                return "Đang học";
+            case "Completed":
+                return "Hoàn thành";
+            case "Cancelled":
+                return "Đã hủy";
+            default:
+                return LanguageCenter.Models.DisplayText.Status(value);
+        }
+    }
+
+    private static string RegistrationStatusText(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Pending":
+                return "Chờ mở lớp";
+            default:
+                return StatusText(value);
+        }
+    }
+
+    private static string StatusBadgeClass(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Upcoming":
+            case "Approved":
+            case "Confirmed":
+            case "Paid":
+                return "bg-success";
+            case "Ongoing":
+                return "bg-info";
+            case "Pending":
+            case "Unpaid":
+                return "bg-warning text-dark";
+            case "Completed":
+                return "bg-primary";
+            case "Cancelled":
+                return "bg-danger";
+            default:
+                return "bg-secondary";
+        }
+    }
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Chi tiết lớp học</h2>
+            <p class="text-muted mb-0">Thông tin lớp, đăng ký và thanh toán của bạn.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="@Url.Action("CreateConsultation", "Student", new { classId = Model.ClassID })" class="btn btn-primary">Gửi tư vấn lớp này</a>
+            <a href="@Url.Action("MyClasses", "Student")" class="btn btn-outline-secondary">Quay lại</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Thông tin lớp học</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Tên lớp</dt>
+                        <dd class="col-sm-8 fw-semibold">@Model.ClassName</dd>
+
+                        <dt class="col-sm-4">Chương trình</dt>
+                        <dd class="col-sm-8">@Model.ProgramName</dd>
+
+                        <dt class="col-sm-4">Giáo viên</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.TeacherName) ? "Đang cập nhật" : Model.TeacherName)</dd>
+
+                        <dt class="col-sm-4">Trạng thái lớp</dt>
+                        <dd class="col-sm-8"><span class="badge @StatusBadgeClass(Model.ClassStatus)">@StatusText(Model.ClassStatus)</span></dd>
+
+                        <dt class="col-sm-4">Ngày bắt đầu</dt>
+                        <dd class="col-sm-8">@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</dd>
+
+                        <dt class="col-sm-4">Lịch học</dt>
+                        <dd class="col-sm-8" style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.Schedule) ? "Chưa có lịch học." : Model.Schedule)</dd>
+
+                        <dt class="col-sm-4">Phòng</dt>
+                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Room) ? "Chưa có phòng." : Model.Room)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Thông tin đăng ký</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Mã đăng ký</dt>
+                        <dd class="col-sm-7">@Model.RegistrationID</dd>
+
+                        <dt class="col-sm-5">Ngày đăng ký</dt>
+                        <dd class="col-sm-7">@(Model.RegistrationDate.HasValue ? Model.RegistrationDate.Value.ToString("dd/MM/yyyy HH:mm") : "Đang cập nhật")</dd>
+
+                        <dt class="col-sm-5">Trạng thái</dt>
+                        <dd class="col-sm-7"><span class="badge @StatusBadgeClass(Model.RegStatus)">@RegistrationStatusText(Model.RegStatus)</span></dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Thông tin thanh toán</h5>
+                </div>
+                <div class="card-body">
+                    @if (!Model.HasPayment)
+                    {
+                        <div class="alert alert-info mb-0">Chưa có thông tin thanh toán.</div>
+                    }
+                    else
+                    {
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Số tiền</dt>
+                            <dd class="col-sm-7">@Model.Amount.ToString("N0")</dd>
+
+                            <dt class="col-sm-5">Trạng thái</dt>
+                            <dd class="col-sm-7"><span class="badge @StatusBadgeClass(Model.PaymentStatus)">@StatusText(Model.PaymentStatus)</span></dd>
+
+                            <dt class="col-sm-5">Phương thức</dt>
+                            <dd class="col-sm-7">@(string.IsNullOrWhiteSpace(Model.Method) ? "Chưa cập nhật" : Model.Method)</dd>
+
+                            <dt class="col-sm-5">Ngày thanh toán</dt>
+                            <dd class="col-sm-7">@(Model.PaymentDate.HasValue ? Model.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa thanh toán")</dd>
+                        </dl>
+
+                        if ((Model.PaymentStatus ?? string.Empty).Trim() == "Unpaid")
+                        {
+                            <a href="@Url.Action("Payments", "Student")" class="btn btn-warning mt-3">Thanh toán</a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

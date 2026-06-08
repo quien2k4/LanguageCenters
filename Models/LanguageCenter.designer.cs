@@ -1347,6 +1347,8 @@ namespace LanguageCenter.Models
 		
 		private int _ConsultationID;
 		
+		private System.Nullable<int> _ClassID;
+		
 		private string _GuestName;
 		
 		private string _ContactInformation;
@@ -1361,6 +1363,8 @@ namespace LanguageCenter.Models
     partial void OnCreated();
     partial void OnConsultationIDChanging(int value);
     partial void OnConsultationIDChanged();
+    partial void OnClassIDChanging(System.Nullable<int> value);
+    partial void OnClassIDChanged();
     partial void OnGuestNameChanging(string value);
     partial void OnGuestNameChanged();
     partial void OnContactInformationChanging(string value);
@@ -1392,6 +1396,26 @@ namespace LanguageCenter.Models
 					this._ConsultationID = value;
 					this.SendPropertyChanged("ConsultationID");
 					this.OnConsultationIDChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ClassID", DbType="Int")]
+		public System.Nullable<int> ClassID
+		{
+			get
+			{
+				return this._ClassID;
+			}
+			set
+			{
+				if ((this._ClassID != value))
+				{
+					this.OnClassIDChanging(value);
+					this.SendPropertyChanging();
+					this._ClassID = value;
+					this.SendPropertyChanged("ClassID");
+					this.OnClassIDChanged();
 				}
 			}
 		}

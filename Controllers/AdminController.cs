@@ -2193,21 +2193,32 @@ namespace LanguageCenter.Controllers
 
             using (var db = new LanguageCenterDataContext(connectionString))
             {
-                var query = db.CONSULTATIONs.Select(c => new AdminConsultationViewModel
-                {
-                    ConsultationID = c.ConsultationID,
-                    GuestName = c.GuestName,
-                    ContactInformation = c.ContactInformation,
-                    QuestionContent = c.QuestionContent,
-                    RequestStatus = c.RequestStatus
-                });
+                var query =
+                    from consultation in db.CONSULTATIONs
+                    join cls in db.CLASSes on consultation.ClassID equals cls.ClassID into classJoin
+                    from cls in classJoin.DefaultIfEmpty()
+                    join program in db.PROGRAMs on cls.ProgramID equals program.ProgramID into programJoin
+                    from program in programJoin.DefaultIfEmpty()
+                    select new AdminConsultationViewModel
+                    {
+                        ConsultationID = consultation.ConsultationID,
+                        ClassID = consultation.ClassID,
+                        ClassName = cls != null ? cls.ClassName : string.Empty,
+                        ProgramName = program != null ? program.ProgramName : string.Empty,
+                        GuestName = consultation.GuestName,
+                        ContactInformation = consultation.ContactInformation,
+                        QuestionContent = consultation.QuestionContent,
+                        RequestStatus = consultation.RequestStatus
+                    };
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     query = query.Where(c =>
                         c.GuestName.Contains(search)
                         || c.ContactInformation.Contains(search)
-                        || c.QuestionContent.Contains(search));
+                        || c.QuestionContent.Contains(search)
+                        || c.ClassName.Contains(search)
+                        || c.ProgramName.Contains(search));
                 }
 
                 if (status != "All")
@@ -2272,6 +2283,16 @@ namespace LanguageCenter.Controllers
                 var model = new AdminConsultationFormViewModel
                 {
                     ConsultationID = consultation.ConsultationID,
+                    ClassID = consultation.ClassID,
+                    ClassName = consultation.ClassID.HasValue
+                        ? db.CLASSes.Where(c => c.ClassID == consultation.ClassID.Value).Select(c => c.ClassName).FirstOrDefault()
+                        : string.Empty,
+                    ProgramName = consultation.ClassID.HasValue
+                        ? (from c in db.CLASSes
+                           join p in db.PROGRAMs on c.ProgramID equals p.ProgramID
+                           where c.ClassID == consultation.ClassID.Value
+                           select p.ProgramName).FirstOrDefault()
+                        : string.Empty,
                     GuestName = consultation.GuestName,
                     ContactInformation = consultation.ContactInformation,
                     QuestionContent = consultation.QuestionContent,
@@ -2310,6 +2331,16 @@ namespace LanguageCenter.Controllers
                 if (!ModelState.IsValid)
                 {
                     model.GuestName = consultation.GuestName;
+                    model.ClassID = consultation.ClassID;
+                    model.ClassName = consultation.ClassID.HasValue
+                        ? db.CLASSes.Where(c => c.ClassID == consultation.ClassID.Value).Select(c => c.ClassName).FirstOrDefault()
+                        : string.Empty;
+                    model.ProgramName = consultation.ClassID.HasValue
+                        ? (from c in db.CLASSes
+                           join p in db.PROGRAMs on c.ProgramID equals p.ProgramID
+                           where c.ClassID == consultation.ClassID.Value
+                           select p.ProgramName).FirstOrDefault()
+                        : string.Empty;
                     model.ContactInformation = consultation.ContactInformation;
                     model.QuestionContent = consultation.QuestionContent;
                     TempData["Error"] = "Please check consultation status.";

@@ -1,0 +1,64 @@
+@model LanguageCenter.Models.TeacherConsultationsViewModel
+
+@{
+    ViewBag.Title = "Tư vấn theo lớp";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Tư vấn theo lớp</h2>
+            <p class="text-muted mb-0">Các yêu cầu tư vấn thuộc những lớp bạn đang dạy.</p>
+        </div>
+        <a href="@Url.Action("MyClasses", "Teacher")" class="btn btn-outline-primary">Quay lại lớp của tôi</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            @if (Model.Consultations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã tư vấn</th>
+                                <th>Lớp</th>
+                                <th>Học viên</th>
+                                <th>Liên hệ</th>
+                                <th>Nội dung câu hỏi</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Consultations)
+                            {
+                                <tr>
+                                    <td>@item.ConsultationID</td>
+                                    <td>
+                                        <div class="fw-semibold">@item.ClassName</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(item.ProgramName) ? "Đang cập nhật" : item.ProgramName)</div>
+                                    </td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.GuestName) ? "Đang cập nhật" : item.GuestName)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.ContactInformation) ? "Đang cập nhật" : item.ContactInformation)</td>
+                                    <td class="text-wrap-cell" style="min-width: 260px;">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "Chưa có câu hỏi" : item.QuestionContent)</td>
+                                    <td>
+                                        <span class="badge @(item.RequestStatus == "Completed" ? "bg-success" : item.RequestStatus == "Cancelled" ? "bg-danger" : item.RequestStatus == "Processing" ? "bg-info" : "bg-warning text-dark")">
+                                            @LanguageCenter.Models.DisplayText.Status(item.RequestStatus)
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4">
+                    <div class="alert alert-info mb-0">Chưa có yêu cầu tư vấn nào thuộc lớp bạn đang dạy.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

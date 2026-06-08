@@ -60,7 +60,7 @@
             {
                 <div class="col-md-7">
                     <label for="search" class="form-label">Tìm kiếm</label>
-                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tên khách, liên hệ, nội dung câu hỏi" />
+                    <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tên khách, lớp, chương trình, liên hệ, nội dung câu hỏi" />
                 </div>
                 <div class="col-md-3">
                     <label for="status" class="form-label">Trạng thái yêu cầu</label>
@@ -91,6 +91,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Mã tư vấn</th>
+                                <th>Lớp</th>
                                 <th>Tên khách</th>
                                 <th>Liên hệ</th>
                                 <th>Nội dung câu hỏi</th>
@@ -103,6 +104,10 @@
                             {
                                 <tr>
                                     <td>@item.ConsultationID</td>
+                                    <td>
+                                        <div class="fw-semibold">@(string.IsNullOrWhiteSpace(item.ClassName) ? "Chưa liên kết lớp" : item.ClassName)</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(item.ProgramName) ? "" : item.ProgramName)</div>
+                                    </td>
                                     <td class="fw-semibold">@(string.IsNullOrWhiteSpace(item.GuestName) ? "Đang cập nhật" : item.GuestName)</td>
                                     <td>@(string.IsNullOrWhiteSpace(item.ContactInformation) ? "Đang cập nhật" : item.ContactInformation)</td>
                                     <td class="text-wrap-cell">@(string.IsNullOrWhiteSpace(item.QuestionContent) ? "Chưa có câu hỏi" : item.QuestionContent)</td>

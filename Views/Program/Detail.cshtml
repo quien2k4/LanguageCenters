@@ -7,44 +7,340 @@
     var imageUrl = string.IsNullOrWhiteSpace(Model.ImageURL)
         ? Url.Content("~/Content/Images/default-program.jpg")
         : Url.Content(Model.ImageURL);
+
+    var isLoggedIn = Session["AccountID"] != null;
+    var isStudent = Model.CurrentRole == "Student";
+    var isStaffRole = Model.CurrentRole == "Admin" || Model.CurrentRole == "Teacher";
 }
 
-<section class="py-5 bg-light">
+@functions {
+    private static string StatusText(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Upcoming":
+                return "Sắp khai giảng";
+            case "Ongoing":
+                return "Đang học";
+            case "Completed":
+                return "Hoàn thành";
+            case "Cancelled":
+                return "Đã hủy";
+            default:
+                return LanguageCenter.Models.DisplayText.Status(value);
+        }
+    }
+
+    private static string StatusBadgeClass(string value)
+    {
+        switch ((value ?? string.Empty).Trim())
+        {
+            case "Upcoming":
+                return "bg-primary";
+            case "Ongoing":
+                return "bg-success";
+            case "Completed":
+                return "bg-secondary";
+            case "Cancelled":
+                return "bg-danger";
+            default:
+                return "bg-info";
+        }
+    }
+
+    private static List<string> LearningOutcomes(string outputStandard, string level)
+    {
+        var result = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(outputStandard))
+        {
+            var parts = outputStandard
+                .Replace("\r", "\n")
+                .Replace("•", "\n")
+                .Replace("-", "\n")
+                .Replace(";", "\n")
+                .Split(new[] { '\n', '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var part in parts)
+            {
+                var item = part.Trim();
+                if (item.Length > 180)
+                {
+                    item = item.Substring(0, 177).Trim() + "...";
+                }
+
+                if (!string.IsNullOrWhiteSpace(item) && !result.Contains(item))
+                {
+                    result.Add(item);
+                }
+
+                if (result.Count == 5)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (result.Any())
+        {
+            return result;
+        }
+
+        var currentLevel = (level ?? string.Empty).Trim().ToLower();
+        if (currentLevel.Contains("beginner"))
+        {
+            result.Add("Nắm được nền tảng từ vựng, ngữ pháp và phát âm cơ bản.");
+            result.Add("Tự tin giao tiếp trong các tình huống quen thuộc hằng ngày.");
+            result.Add("Xây dựng thói quen học tập và luyện tập theo lộ trình rõ ràng.");
+        }
+        else if (currentLevel.Contains("intermediate"))
+        {
+            result.Add("Củng cố nền tảng đã có và mở rộng khả năng diễn đạt.");
+            result.Add("Cải thiện kỹ năng nghe, nói, đọc, viết trong ngữ cảnh học tập và công việc.");
+            result.Add("Sử dụng ngôn ngữ linh hoạt hơn trong các tình huống thực tế.");
+        }
+        else if (currentLevel.Contains("advanced"))
+        {
+            result.Add("Nâng cao độ chính xác, tự nhiên và chiều sâu khi sử dụng ngôn ngữ.");
+            result.Add("Phát triển kỹ năng giao tiếp, thuyết trình hoặc học thuật ở mức cao hơn.");
+            result.Add("Chuẩn bị tốt hơn cho các mục tiêu chuyên sâu hoặc môi trường quốc tế.");
+        }
+        else
+        {
+            result.Add("Học theo lộ trình rõ ràng, phù hợp với trình độ hiện tại.");
+            result.Add("Được hướng dẫn bởi giáo viên và luyện tập qua lớp học thực tế.");
+            result.Add("Cải thiện năng lực sử dụng ngôn ngữ từng bước.");
+        }
+
+        return result;
+    }
+
+    private static List<string> TargetAudienceItems(string level)
+    {
+        var result = new List<string>();
+        var value = (level ?? string.Empty).Trim().ToLower();
+
+        if (value.Contains("beginner"))
+        {
+            result.Add("Người mới bắt đầu hoặc mất gốc.");
+            result.Add("Học viên cần nền tảng căn bản, dễ theo dõi.");
+            result.Add("Người muốn học theo lộ trình chậm, chắc và có hướng dẫn.");
+        }
+        else if (value.Contains("intermediate"))
+        {
+            result.Add("Người đã có nền tảng và muốn học tiếp lên cấp độ cao hơn.");
+            result.Add("Học viên cần tăng khả năng giao tiếp trong học tập hoặc công việc.");
+            result.Add("Người muốn luyện tập đều đặn trong môi trường lớp học.");
+        }
+        else if (value.Contains("advanced"))
+        {
+            result.Add("Người muốn nâng cao kỹ năng giao tiếp, học thuật hoặc chuyên môn.");
+            result.Add("Học viên cần diễn đạt tự nhiên, chính xác và chuyên nghiệp hơn.");
+            result.Add("Người chuẩn bị cho mục tiêu học tập, làm việc hoặc thi cử chuyên sâu.");
+        }
+        else
+        {
+            result.Add("Học viên muốn cải thiện trình độ theo lộ trình có cấu trúc.");
+            result.Add("Người cần giáo viên hỗ trợ và lớp học thực hành thường xuyên.");
+            result.Add("Người muốn chọn chương trình phù hợp với mục tiêu cá nhân.");
+        }
+
+        return result;
+    }
+}
+
+<style>
+    .program-detail-hero {
+        background: #f8fafc;
+    }
+
+    .program-detail-image-box {
+        height: 400px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .program-detail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 12px;
+        background: #ffffff;
+    }
+
+    .program-description {
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.65;
+    }
+
+    .program-info-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        height: 100%;
+        background: #ffffff;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    .program-info-card .label {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .program-info-card .value {
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .program-bullet-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .program-bullet-list li {
+        position: relative;
+        padding-left: 28px;
+        margin-bottom: 14px;
+        line-height: 1.55;
+    }
+
+    .program-bullet-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+    }
+
+    .program-class-table th,
+    .program-class-table td {
+        vertical-align: middle;
+    }
+
+    .program-class-table .schedule-cell {
+        min-width: 210px;
+        white-space: pre-line;
+    }
+
+    .program-role-note {
+        border-left: 4px solid #f59e0b;
+        background: #fffbeb;
+    }
+
+    @@media (max-width: 991.98px) {
+        .program-detail-image-box {
+            height: 360px;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .program-detail-image-box {
+            height: 300px;
+        }
+
+        .program-description {
+            -webkit-line-clamp: 6;
+        }
+    }
+</style>
+
+    <section class="py-4 bg-light border-bottom">
     <div class="container">
-        <div class="row g-4 align-items-center">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Program")">Chương trình</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.ProgramName</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<section class="program-detail-hero py-5">
+    <div class="container">
+        <div class="row g-4 align-items-start">
             <div class="col-lg-5">
-                <img src="@imageUrl" alt="@Model.ProgramName" class="img-fluid rounded shadow-sm w-100" style="max-height: 360px; object-fit: cover;" />
+                <div class="program-detail-image-box">
+                    <img src="@imageUrl" alt="@Model.ProgramName" class="program-detail-image" />
+                </div>
             </div>
             <div class="col-lg-7">
-                <h1 class="fw-bold mb-3">@Model.ProgramName</h1>
-                <p class="text-muted mb-4">
-                    @(string.IsNullOrWhiteSpace(Model.Description) ? "Mô tả đang được cập nhật." : Model.Description)
-                </p>
+                <div class="bg-white rounded shadow-sm p-4 p-lg-5">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <span class="badge bg-success">Chương trình đào tạo</span>
+                        <span class="text-muted small">Mã chương trình: @Model.ProgramID</span>
+                    </div>
 
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="bg-white border rounded p-3 h-100">
-                            <div class="text-muted small">Trình độ</div>
-                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Level) ? "Đang cập nhật" : Model.Level)</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-white border rounded p-3 h-100">
-                            <div class="text-muted small">Thời lượng</div>
-                            <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.Duration) ? "Đang cập nhật" : Model.Duration)</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="bg-white border rounded p-3 h-100">
-                            <div class="text-muted small">Học phí</div>
-                            <div class="fw-semibold">@Model.Fee.ToString("N0")</div>
-                        </div>
-                    </div>
-                </div>
+                    <h1 class="fw-bold mb-3">@Model.ProgramName</h1>
+                    <p class="text-muted fs-5 mb-4 program-description">
+                        @(string.IsNullOrWhiteSpace(Model.Description) ? "Mô tả chương trình đang được cập nhật." : Model.Description)
+                    </p>
 
-                <div class="mt-4">
-                    <h5 class="fw-bold">Chuẩn đầu ra</h5>
-                    <p class="mb-0">@(string.IsNullOrWhiteSpace(Model.OutputStandard) ? "Chuẩn đầu ra đang được cập nhật." : Model.OutputStandard)</p>
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="program-info-card">
+                                <div class="label">Trình độ</div>
+                                <div class="value">@(string.IsNullOrWhiteSpace(Model.Level) ? "Đang cập nhật" : Model.Level)</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="program-info-card">
+                                <div class="label">Thời lượng</div>
+                                <div class="value">@(string.IsNullOrWhiteSpace(Model.Duration) ? "Đang cập nhật" : Model.Duration)</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="program-info-card">
+                                <div class="label">Học phí</div>
+                                <div class="value text-success">@Model.Fee.ToString("N0") VNĐ</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="program-info-card">
+                                <div class="label">Lớp đang mở</div>
+                                <div class="value">@Model.OpenClassCount</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!isLoggedIn)
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="@Url.Action("Login", "Account")" class="btn btn-success btn-lg">Đăng nhập để đăng ký</a>
+                            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary btn-lg">Xem chương trình khác</a>
+                        </div>
+                    }
+                    else if (isStudent)
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="#related-classes" class="btn btn-success btn-lg">Chọn lớp để đăng ký</a>
+                            <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary btn-lg">Xem chương trình khác</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="program-role-note rounded p-3 mb-3">
+                            <div class="fw-semibold">Tài khoản quản trị/giáo viên không thể đăng ký lớp học.</div>
+                            <div class="text-muted small">Bạn vẫn có thể xem thông tin chương trình và danh sách lớp liên quan.</div>
+                        </div>
+                        <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary btn-lg">Xem chương trình khác</a>
+                    }
                 </div>
             </div>
         </div>
@@ -53,65 +349,95 @@
 
 <section class="py-5">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-4">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="bg-white border rounded p-4 h-100 shadow-sm">
+                    <h2 class="fw-bold mb-3">Bạn sẽ học được gì?</h2>
+                    <ul class="program-bullet-list">
+                        @foreach (var item in LearningOutcomes(Model.OutputStandard, Model.Level))
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="bg-success bg-opacity-10 border border-success rounded p-4 h-100 shadow-sm">
+                    <h2 class="fw-bold mb-3">Đối tượng phù hợp</h2>
+                    <ul class="program-bullet-list">
+                        @foreach (var item in TargetAudienceItems(Model.Level))
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="related-classes" class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
             <div>
                 <h2 class="fw-bold mb-1">Lớp liên quan</h2>
-                <p class="text-muted mb-0">Các lớp đang thuộc chương trình này.</p>
+                <p class="text-muted mb-0">Chọn lớp phù hợp với lịch học và đăng ký trực tiếp.</p>
             </div>
             <a href="@Url.Action("Index", "Program")" class="btn btn-outline-secondary">Quay lại chương trình</a>
         </div>
 
         @if (Model.RelatedClasses.Any())
         {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Tên lớp</th>
-                            <th>Giáo viên</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày bắt đầu</th>
-                            <th class="text-end">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.RelatedClasses)
-                        {
+            <div class="bg-white rounded shadow-sm overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 program-class-table">
+                        <thead class="table-light">
                             <tr>
-                                <td class="fw-semibold">@item.ClassName</td>
-                                <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Đang cập nhật" : item.TeacherName)</td>
-                                <td>@LanguageCenter.Models.DisplayText.Status(item.StatusName)</td>
-                                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</td>
-                                <td class="text-end">
-                                    @if (Session["AccountID"] == null)
-                                    {
-                                        <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-sm">Đăng ký</a>
-                                    }
-                                    else if (Model.CurrentRole == "Student")
-                                    {
-                                        <a href="@Url.Action("RegisterClass", "Student", new { classId = item.ClassID })" class="btn btn-primary btn-sm">Đăng ký</a>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Không khả dụng</span>
-                                    }
-                                </td>
+                                <th>Tên lớp</th>
+                                <th>Giáo viên</th>
+                                <th>Lịch học</th>
+                                <th>Phòng</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Thao tác</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.RelatedClasses)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.ClassName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.TeacherName) ? "Đang cập nhật" : item.TeacherName)</td>
+                                    <td class="schedule-cell">@(string.IsNullOrWhiteSpace(item.Schedule) ? "Chưa có lịch học" : item.Schedule)</td>
+                                    <td>@(string.IsNullOrWhiteSpace(item.Room) ? "Chưa có phòng" : item.Room)</td>
+                                    <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "Đang cập nhật")</td>
+                                    <td><span class="badge @StatusBadgeClass(item.StatusName)">@StatusText(item.StatusName)</span></td>
+                                    <td class="text-end">
+                                        @if (!isLoggedIn)
+                                        {
+                                            <a href="@Url.Action("Login", "Account")" class="btn btn-success btn-sm">Đăng nhập để đăng ký</a>
+                                        }
+                                        else if (isStudent)
+                                        {
+                                            <a href="@Url.Action("RegisterClass", "Student", new { classId = item.ClassID })" class="btn btn-success btn-sm">Đăng ký</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary" title="Tài khoản quản trị/giáo viên không thể đăng ký lớp học.">Không khả dụng</span>
+                                            <div class="text-muted small mt-1">Chỉ học viên được đăng ký</div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         }
         else
         {
             <div class="alert alert-info mb-0">Chưa có lớp học cho chương trình này.</div>
         }
-
-        @if (Session["AccountID"] != null && (Model.CurrentRole == "Admin" || Model.CurrentRole == "Teacher"))
-        {
-            <div class="alert alert-warning mt-4 mb-0">
-                Tài khoản quản trị và giáo viên không thể đăng ký lớp học.
-            </div>
-        }
     </div>
 </section>
+

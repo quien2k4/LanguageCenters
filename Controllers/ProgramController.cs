@@ -125,12 +125,66 @@ namespace LanguageCenter.Controllers
                         ClassName = c.ClassName,
                         TeacherName = t != null ? t.FullName : string.Empty,
                         StatusName = s != null ? s.StatusName : string.Empty,
-                        StartDate = c.StartDate
+                        StartDate = c.StartDate,
+                        Schedule = "Chưa có lịch học",
+                        Room = "Chưa có phòng"
                     })
                     .ToList();
+
+                FillClassSchedules(db, model.RelatedClasses);
+                model.OpenClassCount = model.RelatedClasses.Count(c => IsOpenClassStatus(c.StatusName));
 
                 return View(model);
             }
         }
+
+        private static void FillClassSchedules(LanguageCenterDataContext db, System.Collections.Generic.List<RelatedClassViewModel> classes)
+        {
+            var classIds = classes.Select(c => c.ClassID).ToList();
+            if (!classIds.Any())
+            {
+                return;
+            }
+
+            var schedules = db.CLASS_SCHEDULEs
+                .Where(s => classIds.Contains(s.ClassID))
+                .OrderBy(s => s.ClassID)
+                .ThenBy(s => s.ScheduleID)
+                .ToList()
+                .GroupBy(s => s.ClassID)
+                .ToDictionary(s => s.Key, s => s.ToList());
+
+            foreach (var item in classes)
+            {
+                if (!schedules.ContainsKey(item.ClassID) || !schedules[item.ClassID].Any())
+                {
+                    item.Schedule = "Chưa có lịch học";
+                    item.Room = "Chưa có phòng";
+                    continue;
+                }
+
+                var rows = schedules[item.ClassID].Select(s =>
+                    string.Format("{0} {1:hh\\:mm} - {2:hh\\:mm}", s.DayOfWeek, s.StartTime, s.EndTime));
+
+                var rooms = schedules[item.ClassID]
+                    .Where(s => !string.IsNullOrWhiteSpace(s.Room))
+                    .Select(s => s.Room)
+                    .Distinct()
+                    .ToList();
+
+                item.Schedule = string.Join("\n", rows);
+                item.Room = rooms.Any() ? string.Join(", ", rooms) : "Chưa có phòng";
+            }
+        }
+
+        private static bool IsOpenClassStatus(string statusName)
+        {
+            var status = (statusName ?? string.Empty).Trim();
+            return status != "Completed"
+                && status != "Cancelled"
+                && status != "Hoàn thành"
+                && status != "Đã hủy";
+        }
     }
 }
+

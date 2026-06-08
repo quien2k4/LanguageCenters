@@ -14,6 +14,7 @@ namespace LanguageCenter.Models
         public decimal Fee { get; set; }
         public string ImageURL { get; set; }
         public string CurrentRole { get; set; }
+        public int OpenClassCount { get; set; }
         public List<RelatedClassViewModel> RelatedClasses { get; set; }
 
         public ProgramDetailViewModel()
@@ -29,5 +30,8 @@ namespace LanguageCenter.Models
         public string TeacherName { get; set; }
         public string StatusName { get; set; }
         public DateTime? StartDate { get; set; }
+        public string Schedule { get; set; }
+        public string Room { get; set; }
     }
 }
+

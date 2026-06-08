@@ -9,7 +9,6 @@ namespace LanguageCenter.Models
         public string CurrentPassword { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu mới.")]
-        [MinLength(3, ErrorMessage = "Mật khẩu mới phải có ít nhất 3 ký tự.")]
         [Display(Name = "Mật khẩu mới")]
         public string NewPassword { get; set; }
 
@@ -19,4 +18,5 @@ namespace LanguageCenter.Models
         public string ConfirmPassword { get; set; }
     }
 }
+
 

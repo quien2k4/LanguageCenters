@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="Helpers\AuthHelper.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
+    <Compile Include="Helpers\PasswordValidationHelper.cs" />
     <Compile Include="Models\CreateConsultationViewModel.cs" />
     <Compile Include="Models\CreatePlacementTestViewModel.cs" />
     <Compile Include="Models\LanguageCenter.designer.cs">

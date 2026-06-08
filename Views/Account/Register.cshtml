@@ -21,30 +21,50 @@
         @using (Html.BeginForm("Register", "Account", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
             <div class="mb-3">
                 @Html.LabelFor(model => model.FullName, "Họ tên", new { @class = "form-label" })
                 @Html.TextBoxFor(model => model.FullName, new { @class = "form-control", autocomplete = "name", required = "required" })
+                @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
             </div>
 
             <div class="mb-3">
                 @Html.LabelFor(model => model.Email, "Email", new { @class = "form-label" })
                 @Html.TextBoxFor(model => model.Email, new { @class = "form-control", type = "email", autocomplete = "email", required = "required" })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
             </div>
 
             <div class="mb-3">
                 @Html.LabelFor(model => model.Password, "Mật khẩu", new { @class = "form-label" })
                 @Html.PasswordFor(model => model.Password, new { @class = "form-control", autocomplete = "new-password", required = "required" })
+                <div class="form-text">Mật khẩu phải có ít nhất 6 ký tự, gồm chữ và số.</div>
+                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
             </div>
 
             <div class="mb-3">
                 @Html.LabelFor(model => model.ConfirmPassword, "Xác nhận mật khẩu", new { @class = "form-label" })
                 @Html.PasswordFor(model => model.ConfirmPassword, new { @class = "form-control", autocomplete = "new-password", required = "required" })
+                @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
             </div>
 
             <div class="mb-3">
                 @Html.LabelFor(model => model.PhoneNumber, "Số điện thoại", new { @class = "form-label" })
                 @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control", type = "tel", autocomplete = "tel", required = "required" })
+                <div class="form-text">Ví dụ: 0901234567 hoặc +84901234567.</div>
+                @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mã xác nhận</label>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <div class="border rounded px-4 py-2 bg-light fw-bold fs-5 text-success" style="letter-spacing: 4px;">
+                        @ViewBag.RegisterCaptcha
+                    </div>
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-secondary btn-sm">Đổi mã</a>
+                </div>
+                @Html.TextBoxFor(model => model.CaptchaCode, new { @class = "form-control", placeholder = "Nhập 4 chữ số", maxlength = "4", inputmode = "numeric", required = "required" })
+                @Html.ValidationMessageFor(model => model.CaptchaCode, "", new { @class = "text-danger" })
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
@@ -55,3 +75,5 @@
         </div>
     </div>
 </div>
+
+

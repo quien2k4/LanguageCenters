@@ -104,6 +104,7 @@ namespace LanguageCenter.Controllers
         [HttpGet]
         public ActionResult Register()
         {
+            GenerateRegisterCaptcha();
             return View(new RegisterViewModel());
         }
 
@@ -111,15 +112,30 @@ namespace LanguageCenter.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Register(RegisterViewModel model)
         {
+            string passwordError;
+            if (!string.IsNullOrEmpty(model.Password)
+                && !PasswordValidationHelper.IsValidPassword(model.Password, out passwordError))
+            {
+                ModelState.AddModelError("Password", passwordError);
+            }
+
+            var currentCaptcha = Session["RegisterCaptcha"] == null
+                ? string.Empty
+                : Session["RegisterCaptcha"].ToString();
+
+            if (string.IsNullOrWhiteSpace(model.CaptchaCode))
+            {
+                ModelState.AddModelError("CaptchaCode", "Vui lòng nhập mã xác nhận.");
+            }
+            else if (model.CaptchaCode.Trim() != currentCaptcha)
+            {
+                ModelState.AddModelError("CaptchaCode", "Mã xác nhận không đúng.");
+            }
+
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Vui lòng nhập đầy đủ thông tin đăng ký.";
-                return View(model);
-            }
-
-            if (model.Password != model.ConfirmPassword)
-            {
-                TempData["Error"] = "Mật khẩu và xác nhận mật khẩu phải giống nhau.";
+                GenerateRegisterCaptcha();
                 return View(model);
             }
 
@@ -130,7 +146,9 @@ namespace LanguageCenter.Controllers
 
                 if (isEmailExists)
                 {
-                    TempData["Error"] = "Email đã tồn tại.";
+                    ModelState.AddModelError("Email", "Email này đã được sử dụng.");
+                    TempData["Error"] = "Email này đã được sử dụng.";
+                    GenerateRegisterCaptcha();
                     return View(model);
                 }
 
@@ -158,6 +176,7 @@ namespace LanguageCenter.Controllers
                 db.SubmitChanges();
             }
 
+            Session.Remove("RegisterCaptcha");
             TempData["Success"] = "Đăng ký thành công. Vui lòng đăng nhập.";
             return RedirectToAction("Login");
         }
@@ -216,9 +235,11 @@ namespace LanguageCenter.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ResetPassword(ResetPasswordViewModel model)
         {
-            if (model.NewPassword != model.ConfirmPassword)
+            string passwordError;
+            if (!string.IsNullOrEmpty(model.NewPassword)
+                && !PasswordValidationHelper.IsValidPassword(model.NewPassword, out passwordError))
             {
-                ModelState.AddModelError("ConfirmPassword", "Xác nhận mật khẩu không khớp.");
+                ModelState.AddModelError("NewPassword", passwordError);
             }
 
             using (var db = new LanguageCenterDataContext(connectionString))
@@ -251,6 +272,14 @@ namespace LanguageCenter.Controllers
         {
             Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+
+        private void GenerateRegisterCaptcha()
+        {
+            var random = new Random();
+            var captcha = random.Next(1000, 10000).ToString();
+            Session["RegisterCaptcha"] = captcha;
+            ViewBag.RegisterCaptcha = captcha;
         }
 
         private static USER_ACCOUNT GetPasswordResetAccount(LanguageCenterDataContext db, string email, out string errorMessage)
@@ -340,26 +369,36 @@ namespace LanguageCenter.Controllers
 
     public class RegisterViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Họ tên không được để trống.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Họ tên phải từ 2 đến 100 ký tự.")]
+        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Họ tên không được để trống.")]
         [Display(Name = "Họ tên")]
         public string FullName { get; set; }
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Email không được để trống.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Mật khẩu không được để trống.")]
         [Display(Name = "Mật khẩu")]
         public string Password { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Xác nhận mật khẩu không được để trống.")]
+        [System.ComponentModel.DataAnnotations.Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         [Display(Name = "Xác nhận mật khẩu")]
         public string ConfirmPassword { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Số điện thoại không được để trống.")]
+        [RegularExpression(@"^(0|\+84)(3|5|7|8|9)\d{8}$", ErrorMessage = "Số điện thoại không hợp lệ.")]
         [Display(Name = "Số điện thoại")]
         public string PhoneNumber { get; set; }
+
+        [Display(Name = "Mã xác nhận")]
+        public string CaptchaCode { get; set; }
     }
 }
+
+
+
 
 

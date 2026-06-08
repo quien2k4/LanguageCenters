@@ -162,9 +162,17 @@ namespace LanguageCenter.Controllers
                 return authResult;
             }
 
-            if (model.NewPassword != model.ConfirmPassword)
+            string passwordError;
+            if (!string.IsNullOrEmpty(model.NewPassword)
+                && !PasswordValidationHelper.IsValidPassword(model.NewPassword, out passwordError))
             {
-                ModelState.AddModelError("ConfirmPassword", "Xác nhận mật khẩu không khớp.");
+                ModelState.AddModelError("NewPassword", passwordError);
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.CurrentPassword)
+                && model.NewPassword == model.CurrentPassword)
+            {
+                ModelState.AddModelError("NewPassword", "Mật khẩu mới không được trùng với mật khẩu hiện tại.");
             }
 
             if (!ModelState.IsValid)
@@ -835,5 +843,6 @@ namespace LanguageCenter.Controllers
         }
     }
 }
+
 
 

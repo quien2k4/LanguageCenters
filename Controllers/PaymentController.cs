@@ -69,6 +69,9 @@ namespace LanguageCenter.Controllers
 
                 var library = new VnPayLibrary();
                 var createDate = DateTime.Now;
+                var expireDate = createDate.AddMinutes(15);
+                var rawAmount = paymentInfo.Payment.Amount;
+                var vnpAmount = VnPayLibrary.FormatAmount(rawAmount);
                 var returnUrl = string.IsNullOrWhiteSpace(config.ReturnUrl)
                     ? Url.Action("VnPayReturn", "Payment", null, Request.Url.Scheme)
                     : config.ReturnUrl;
@@ -76,12 +79,13 @@ namespace LanguageCenter.Controllers
                 library.AddRequestData("vnp_Version", "2.1.0");
                 library.AddRequestData("vnp_Command", "pay");
                 library.AddRequestData("vnp_TmnCode", config.TmnCode);
-                library.AddRequestData("vnp_Amount", VnPayLibrary.FormatAmount(paymentInfo.Payment.Amount));
+                library.AddRequestData("vnp_Amount", vnpAmount);
                 library.AddRequestData("vnp_CreateDate", createDate.ToString("yyyyMMddHHmmss"));
                 library.AddRequestData("vnp_CurrCode", "VND");
+                library.AddRequestData("vnp_ExpireDate", expireDate.ToString("yyyyMMddHHmmss"));
                 library.AddRequestData("vnp_IpAddr", GetIpAddress());
                 library.AddRequestData("vnp_Locale", "vn");
-                library.AddRequestData("vnp_OrderInfo", "LanguageCenter Payment " + paymentInfo.Payment.PaymentID);
+                library.AddRequestData("vnp_OrderInfo", "PaymentId_" + paymentInfo.Payment.PaymentID);
                 library.AddRequestData("vnp_OrderType", "other");
                 library.AddRequestData("vnp_ReturnUrl", returnUrl);
                 library.AddRequestData("vnp_TxnRef", paymentInfo.Payment.PaymentID.ToString(CultureInfo.InvariantCulture));
@@ -93,8 +97,9 @@ namespace LanguageCenter.Controllers
                         + "vnp_TmnCode: " + config.TmnCode + Environment.NewLine
                         + "vnp_ReturnUrl: " + returnUrl + Environment.NewLine
                         + "paymentId: " + paymentInfo.Payment.PaymentID + Environment.NewLine
-                        + "vnp_Amount: " + VnPayLibrary.FormatAmount(paymentInfo.Payment.Amount) + Environment.NewLine
-                        + "vnp_RequestData: " + library.GetRequestDebugQuery() + Environment.NewLine
+                        + "amount_goc: " + rawAmount.ToString("0.##", CultureInfo.InvariantCulture) + Environment.NewLine
+                        + "vnp_Amount: " + vnpAmount + Environment.NewLine
+                        + "signData: " + library.GetRequestSignData() + Environment.NewLine
                         + "vnp_PaymentUrlMasked: " + MaskSecureHash(paymentUrl);
 
                     return Content(debugText, "text/plain");

@@ -36,27 +36,15 @@ namespace LanguageCenter.VNPAY
 
         public string CreateRequestUrl(string baseUrl, string hashSecret)
         {
-            var query = BuildQueryString(requestData);
-            var signData = BuildQueryString(requestData);
+            var signData = GetRequestSignData();
             var secureHash = HmacSHA512(hashSecret, signData);
 
-            return baseUrl + "?" + query + "&vnp_SecureHash=" + secureHash;
+            return baseUrl + "?" + signData + "&vnp_SecureHash=" + secureHash;
         }
 
         public bool ValidateSignature(string inputHash, string hashSecret)
         {
-            var filteredData = new SortedList<string, string>(new VnPayCompare());
-
-            foreach (var item in responseData)
-            {
-                if (!item.Key.Equals("vnp_SecureHash", StringComparison.OrdinalIgnoreCase)
-                    && !item.Key.Equals("vnp_SecureHashType", StringComparison.OrdinalIgnoreCase))
-                {
-                    filteredData[item.Key] = item.Value;
-                }
-            }
-
-            var signData = BuildQueryString(filteredData);
+            var signData = GetResponseSignData();
             var computedHash = HmacSHA512(hashSecret, signData);
 
             return string.Equals(computedHash, inputHash, StringComparison.OrdinalIgnoreCase);
@@ -69,7 +57,28 @@ namespace LanguageCenter.VNPAY
 
         public string GetRequestDebugQuery()
         {
+            return GetRequestSignData();
+        }
+
+        public string GetRequestSignData()
+        {
             return BuildQueryString(requestData);
+        }
+
+        public string GetResponseSignData()
+        {
+            var filteredData = new SortedList<string, string>(new VnPayCompare());
+
+            foreach (var item in responseData)
+            {
+                if (!item.Key.Equals("vnp_SecureHash", StringComparison.OrdinalIgnoreCase)
+                    && !item.Key.Equals("vnp_SecureHashType", StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredData[item.Key] = item.Value;
+                }
+            }
+
+            return BuildQueryString(filteredData);
         }
 
         private static string BuildQueryString(SortedList<string, string> data)
@@ -78,7 +87,9 @@ namespace LanguageCenter.VNPAY
                 .Where(item => !string.IsNullOrWhiteSpace(item.Value))
                 .Select(item =>
                 {
-                    return WebUtility.UrlEncode(item.Key) + "=" + WebUtility.UrlEncode(item.Value);
+                    return WebUtility.UrlEncode(item.Key)
+                        + "="
+                        + WebUtility.UrlEncode(item.Value);
                 });
 
             return string.Join("&", parts);

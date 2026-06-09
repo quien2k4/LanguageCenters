@@ -168,11 +168,10 @@ namespace LanguageCenter.Controllers
                 db.SubmitChanges();
 
                 var emailInfo = GetPaymentSuccessEmailInfo(db, paymentId, transactionNo, responseCode);
-                string emailError;
-                var emailSent = emailInfo != null && EmailHelper.SendPaymentSuccessEmail(emailInfo, out emailError);
-                var successMessage = emailSent
-                    ? "Thanh toán thành công. Email xác nhận đã được gửi."
-                    : "Thanh toán thành công, nhưng gửi email xác nhận thất bại.";
+                var emailResult = emailInfo != null
+                    ? EmailHelper.SendPaymentSuccessEmails(emailInfo)
+                    : new PaymentEmailSendResult();
+                var successMessage = BuildPaymentEmailResultMessage(emailResult);
 
                 return StoreAndRedirectResult(true, "Payment successful", successMessage, paymentId, amountText, transactionNo, responseCode);
             }
@@ -256,6 +255,7 @@ namespace LanguageCenter.Controllers
                     RegistrationID = pay.RegistrationID,
                     StudentName = student.FullName,
                     StudentEmail = account != null ? account.Email : string.Empty,
+                    PhoneNumber = student.PhoneNumber,
                     ClassName = classInfo != null ? classInfo.ClassName : string.Empty,
                     ProgramName = program != null ? program.ProgramName : string.Empty,
                     Amount = pay.Amount,
@@ -267,6 +267,26 @@ namespace LanguageCenter.Controllers
                 .FirstOrDefault();
 
             return info;
+        }
+
+        private static string BuildPaymentEmailResultMessage(PaymentEmailSendResult result)
+        {
+            if (result.AdminSent && result.StudentSent)
+            {
+                return "Thanh toán thành công. Email xác nhận đã được gửi cho bạn và trung tâm.";
+            }
+
+            if (result.AdminSent && !result.StudentSent)
+            {
+                return "Thanh toán thành công. Email trung tâm đã gửi, nhưng email học viên gửi thất bại.";
+            }
+
+            if (!result.AdminSent && result.StudentSent)
+            {
+                return "Thanh toán thành công. Email học viên đã gửi, nhưng email trung tâm gửi thất bại.";
+            }
+
+            return "Thanh toán thành công, nhưng gửi email xác nhận thất bại.";
         }
 
         private string GetIpAddress()

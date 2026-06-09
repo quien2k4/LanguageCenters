@@ -10,7 +10,6 @@
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
                 <h2 class="mb-3">Xác minh đăng nhập</h2>
-
                 <p class="text-muted">
                     Mã xác minh đã được gửi đến email của bạn
                     @if (ViewBag.Email != null)
@@ -36,14 +35,7 @@
 
                     <div class="mb-3">
                         @Html.LabelFor(model => model.OtpCode, "Mã xác minh", new { @class = "form-label" })
-                        @Html.TextBoxFor(model => model.OtpCode, new
-                        {
-                            @class = "form-control text-center fw-bold",
-                            maxlength = "4",
-                            inputmode = "numeric",
-                            autocomplete = "one-time-code",
-                            placeholder = "Nhập 4 chữ số"
-                        })
+                        @Html.TextBoxFor(model => model.OtpCode, new { @class = "form-control text-center fw-bold", maxlength = "4", inputmode = "numeric", autocomplete = "one-time-code", placeholder = "Nhập 4 chữ số" })
                         @Html.ValidationMessageFor(model => model.OtpCode, "", new { @class = "text-danger" })
                     </div>
 

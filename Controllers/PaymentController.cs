@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
+using LanguageCenter.Helpers;
 using LanguageCenter.Models;
 using LanguageCenter.VNPAY;
 
@@ -165,9 +166,17 @@ namespace LanguageCenter.Controllers
                 payment.Method = "VNPAY";
                 payment.PaymentDate = DateTime.Now;
                 db.SubmitChanges();
+
+                var emailInfo = GetPaymentSuccessEmailInfo(db, paymentId, transactionNo, responseCode);
+                string emailError;
+                var emailSent = emailInfo != null && EmailHelper.SendPaymentSuccessEmail(emailInfo, out emailError);
+                var successMessage = emailSent
+                    ? "Thanh toán thành công. Email xác nhận đã được gửi."
+                    : "Thanh toán thành công, nhưng gửi email xác nhận thất bại.";
+
+                return StoreAndRedirectResult(true, "Payment successful", successMessage, paymentId, amountText, transactionNo, responseCode);
             }
 
-            return StoreAndRedirectResult(true, "Payment successful", "Your VNPAY payment was completed successfully.", paymentId, amountText, transactionNo, responseCode);
         }
 
         [HttpGet]
@@ -226,6 +235,38 @@ namespace LanguageCenter.Controllers
             }
 
             return db.STUDENTs.FirstOrDefault(s => s.AccountID == accountId);
+        }
+
+        private PaymentSuccessEmailInfo GetPaymentSuccessEmailInfo(LanguageCenterDataContext db, int paymentId, string transactionNo, string responseCode)
+        {
+            var info = (
+                from pay in db.PAYMENTs
+                join registration in db.REGISTRATIONs on pay.RegistrationID equals registration.RegistrationID
+                join student in db.STUDENTs on registration.StudentID equals student.StudentID
+                join account in db.USER_ACCOUNTs on student.AccountID equals account.AccountID into accountJoin
+                from account in accountJoin.DefaultIfEmpty()
+                join classInfo in db.CLASSes on registration.ClassID equals classInfo.ClassID into classJoin
+                from classInfo in classJoin.DefaultIfEmpty()
+                join program in db.PROGRAMs on classInfo.ProgramID equals program.ProgramID into programJoin
+                from program in programJoin.DefaultIfEmpty()
+                where pay.PaymentID == paymentId
+                select new PaymentSuccessEmailInfo
+                {
+                    PaymentID = pay.PaymentID,
+                    RegistrationID = pay.RegistrationID,
+                    StudentName = student.FullName,
+                    StudentEmail = account != null ? account.Email : string.Empty,
+                    ClassName = classInfo != null ? classInfo.ClassName : string.Empty,
+                    ProgramName = program != null ? program.ProgramName : string.Empty,
+                    Amount = pay.Amount,
+                    PaymentDate = pay.PaymentDate,
+                    Method = pay.Method,
+                    VnPayTransactionNo = transactionNo,
+                    ResponseCode = responseCode
+                })
+                .FirstOrDefault();
+
+            return info;
         }
 
         private string GetIpAddress()

@@ -85,19 +85,15 @@ namespace LanguageCenter.Controllers
 
                 TempData["Success"] = "Đăng nhập thành công.";
 
-                switch ((account.Role ?? string.Empty).Trim())
+                var role = (account.Role ?? string.Empty).Trim();
+                if (role != "Admin" && role != "Teacher" && role != "Student")
                 {
-                    case "Admin":
-                        return RedirectToAction("Dashboard", "Admin");
-                    case "Teacher":
-                        return RedirectToAction("Dashboard", "Teacher");
-                    case "Student":
-                        return RedirectToAction("Profile", "Student");
-                    default:
-                        Session.Clear();
-                        TempData["Error"] = "Vai trò tài khoản không hợp lệ.";
-                        return RedirectToAction("Login");
+                    Session.Clear();
+                    TempData["Error"] = "Vai trò tài khoản không hợp lệ.";
+                    return RedirectToAction("Login");
                 }
+
+                return RedirectToAction("Index", "Home");
             }
         }
 

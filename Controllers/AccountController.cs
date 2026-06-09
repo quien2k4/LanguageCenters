@@ -148,6 +148,18 @@ namespace LanguageCenter.Controllers
                 return View(model);
             }
 
+            var fixedTestEnabled = IsFixedTestOtpEnabled();
+            var fixedTestCode = GetFixedTestOtpCode();
+            var enteredOtp = (model.OtpCode ?? string.Empty).Trim();
+
+            if (fixedTestEnabled && !string.IsNullOrWhiteSpace(fixedTestCode) && enteredOtp == fixedTestCode)
+            {
+                SetPendingLoginSessionAsReal();
+                ClearPendingLoginOtp();
+                TempData["Success"] = "Đăng nhập thành công.";
+                return RedirectToAction("Index", "Home");
+            }
+
             var expireAt = Session["LoginOtpExpireAt"] as DateTime?;
             if (!expireAt.HasValue || OtpHelper.IsOtpExpired(expireAt.Value))
             {
@@ -156,18 +168,13 @@ namespace LanguageCenter.Controllers
             }
 
             var otpCode = Session["LoginOtpCode"] == null ? string.Empty : Session["LoginOtpCode"].ToString();
-            if (model.OtpCode != otpCode)
+            if (enteredOtp != otpCode)
             {
                 ModelState.AddModelError("OtpCode", "Mã xác minh không đúng.");
                 return View(model);
             }
 
-            Session["AccountID"] = Session["PendingLoginAccountID"];
-            Session["Email"] = Session["PendingLoginEmail"];
-            Session["Role"] = Session["PendingLoginRole"];
-            Session["Avatar"] = Session["PendingLoginAvatar"];
-            Session["FullName"] = Session["PendingLoginFullName"];
-
+            SetPendingLoginSessionAsReal();
             ClearPendingLoginOtp();
             TempData["Success"] = "Đăng nhập thành công.";
             return RedirectToAction("Index", "Home");
@@ -517,6 +524,27 @@ namespace LanguageCenter.Controllers
         {
             var lastSentAt = Session[sessionKey] as DateTime?;
             return !lastSentAt.HasValue || DateTime.Now.Subtract(lastSentAt.Value).TotalSeconds >= 60;
+        }
+
+        private void SetPendingLoginSessionAsReal()
+        {
+            Session["AccountID"] = Session["PendingLoginAccountID"];
+            Session["Email"] = Session["PendingLoginEmail"];
+            Session["Role"] = Session["PendingLoginRole"];
+            Session["Avatar"] = Session["PendingLoginAvatar"];
+            Session["FullName"] = Session["PendingLoginFullName"];
+        }
+
+        private static bool IsFixedTestOtpEnabled()
+        {
+            var value = (ConfigurationManager.AppSettings["otp_EnableFixedTestCode"] ?? string.Empty).Trim();
+            bool enabled;
+            return bool.TryParse(value, out enabled) && enabled;
+        }
+
+        private static string GetFixedTestOtpCode()
+        {
+            return (ConfigurationManager.AppSettings["otp_FixedTestCode"] ?? string.Empty).Trim();
         }
 
         private void GenerateRegisterCaptcha()

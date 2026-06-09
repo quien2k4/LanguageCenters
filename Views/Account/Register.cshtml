@@ -51,23 +51,11 @@
             <div class="mb-3">
                 @Html.LabelFor(model => model.PhoneNumber, "Số điện thoại", new { @class = "form-label" })
                 @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control", type = "tel", autocomplete = "tel", required = "required" })
-                <div class="form-text">Ví dụ: 0901234567 hoặc +84901234567.</div>
+                <div class="form-text">+84</div>
                 @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Mã xác nhận</label>
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                    <div class="border rounded px-4 py-2 bg-light fw-bold fs-5 text-success" style="letter-spacing: 4px;">
-                        @ViewBag.RegisterCaptcha
-                    </div>
-                    <a href="@Url.Action("Register", "Account")" class="btn btn-outline-secondary btn-sm">Đổi mã</a>
-                </div>
-                @Html.TextBoxFor(model => model.CaptchaCode, new { @class = "form-control", placeholder = "Nhập 4 chữ số", maxlength = "4", inputmode = "numeric", required = "required" })
-                @Html.ValidationMessageFor(model => model.CaptchaCode, "", new { @class = "text-danger" })
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
+            <button type="submit" class="btn btn-primary w-100">Gửi mã xác minh</button>
         }
 
         <div class="mt-3">

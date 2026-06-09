@@ -1,0 +1,52 @@
+@model LanguageCenter.Models.VerifyOtpViewModel
+
+@{
+    ViewBag.Title = "Xác minh đăng ký";
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h2 class="mb-3">Xác minh đăng ký</h2>
+                <p class="text-muted">
+                    Mã xác minh đã được gửi đến email của bạn
+                    @if (ViewBag.Email != null)
+                    {
+                        <strong>@ViewBag.Email</strong>
+                    }
+                    . Mã có hiệu lực trong 5 phút.
+                </p>
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["Error"]</div>
+                }
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">@TempData["Success"]</div>
+                }
+
+                @using (Html.BeginForm("VerifyRegisterOtp", "Account", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        @Html.LabelFor(model => model.OtpCode, "Mã xác minh", new { @class = "form-label" })
+                        @Html.TextBoxFor(model => model.OtpCode, new { @class = "form-control text-center fw-bold", maxlength = "4", inputmode = "numeric", autocomplete = "one-time-code", placeholder = "Nhập 4 chữ số" })
+                        @Html.ValidationMessageFor(model => model.OtpCode, "", new { @class = "text-danger" })
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Xác minh</button>
+                }
+
+                <div class="mt-3 d-flex justify-content-between">
+                    @Html.ActionLink("Gửi lại mã", "ResendRegisterOtp", "Account")
+                    @Html.ActionLink("Quay lại đăng ký", "Register", "Account")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

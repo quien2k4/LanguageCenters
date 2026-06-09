@@ -35,6 +35,28 @@ namespace LanguageCenter.Helpers
 
     public static class EmailHelper
     {
+        public static bool SendOtpEmail(string toEmail, string subject, string bodyText, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            var config = GetSmtpConfig();
+            if (!config.IsValid)
+            {
+                errorMessage = "SMTP is not configured.";
+                return false;
+            }
+
+            var html = new StringBuilder();
+            html.Append("<div style=\"font-family:Arial,sans-serif;color:#1f2937;line-height:1.6;\">");
+            html.Append("<h2 style=\"color:#16a34a;margin-bottom:12px;\">LanguageCenter</h2>");
+            html.Append("<p>");
+            html.Append(Html(bodyText).Replace("\r\n", "<br />").Replace("\n", "<br />"));
+            html.Append("</p>");
+            html.Append("</div>");
+
+            return SendEmail(config, toEmail, subject, html.ToString(), out errorMessage);
+        }
+
         public static PaymentEmailSendResult SendPaymentSuccessEmails(PaymentSuccessEmailInfo info)
         {
             var result = new PaymentEmailSendResult();

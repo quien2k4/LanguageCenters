@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="Helpers\AuthHelper.cs" />
     <Compile Include="Helpers\EmailHelper.cs" />
+    <Compile Include="Helpers\OtpHelper.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\PasswordValidationHelper.cs" />
     <Compile Include="Models\CreateConsultationViewModel.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="Models\ProgramDetailViewModel.cs" />
     <Compile Include="Models\ProgramListViewModel.cs" />
     <Compile Include="Models\ResetPasswordViewModel.cs" />
+    <Compile Include="Models\VerifyOtpViewModel.cs" />
     <Compile Include="Models\ChangePasswordViewModel.cs" />
     <Compile Include="Models\EditStudentProfileViewModel.cs" />
     <Compile Include="Models\StudentConsultationsViewModel.cs" />
@@ -267,6 +269,8 @@
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\Account\ResetPassword.cshtml" />
+    <Content Include="Views\Account\VerifyRegisterOtp.cshtml" />
+    <Content Include="Views\Account\VerifyLoginOtp.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\Programs.cshtml" />
     <Content Include="Views\Admin\CreateProgram.cshtml" />

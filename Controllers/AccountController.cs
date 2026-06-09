@@ -70,21 +70,6 @@ namespace LanguageCenter.Controllers
                     return View(model);
                 }
 
-                account.FailedLoginAttempts = 0;
-                if (!PasswordHelper.IsHashedPassword(account.PasswordHash))
-                {
-                    account.PasswordHash = PasswordHelper.HashPassword(model.Password);
-                }
-                db.SubmitChanges();
-
-                Session["AccountID"] = account.AccountID;
-                Session["Email"] = account.Email;
-                Session["Role"] = account.Role;
-                Session["FullName"] = GetFullName(db, account);
-                Session["Avatar"] = account.Avatar;
-
-                TempData["Success"] = "Đăng nhập thành công.";
-
                 var role = (account.Role ?? string.Empty).Trim();
                 if (role != "Admin" && role != "Teacher" && role != "Student")
                 {
@@ -93,14 +78,138 @@ namespace LanguageCenter.Controllers
                     return RedirectToAction("Login");
                 }
 
-                return RedirectToAction("Index", "Home");
+                account.FailedLoginAttempts = 0;
+                if (!PasswordHelper.IsHashedPassword(account.PasswordHash))
+                {
+                    account.PasswordHash = PasswordHelper.HashPassword(model.Password);
+                }
+                db.SubmitChanges();
+
+                if (role == "Admin")
+                {
+                    SetLoginSession(db, account);
+                    TempData["Success"] = "Đăng nhập thành công.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var otpCode = OtpHelper.GenerateOtpCode();
+                var emailBody = "Xin chào " + account.Email + ",\n"
+                    + "Mã xác minh đăng nhập của bạn là: " + otpCode + "\n"
+                    + "Mã này có hiệu lực trong 5 phút.\n"
+                    + "Nếu bạn không thực hiện đăng nhập, vui lòng bỏ qua email.";
+
+                string emailError;
+                if (!EmailHelper.SendOtpEmail(account.Email, "[LanguageCenter] Mã xác minh đăng nhập", emailBody, out emailError))
+                {
+                    TempData["Error"] = "Không gửi được mã xác minh. Vui lòng thử lại sau.";
+                    return View(model);
+                }
+
+                ClearPendingLoginOtp();
+                Session["PendingLoginAccountID"] = account.AccountID;
+                Session["PendingLoginEmail"] = account.Email;
+                Session["PendingLoginRole"] = role;
+                Session["PendingLoginAvatar"] = account.Avatar;
+                Session["PendingLoginFullName"] = GetFullName(db, account);
+                Session["LoginOtpCode"] = otpCode;
+                Session["LoginOtpExpireAt"] = OtpHelper.GetExpireTime();
+                Session["LoginOtpLastSentAt"] = DateTime.Now;
+
+                TempData["Success"] = "Mã xác minh đã được gửi đến email của bạn.";
+                return RedirectToAction("VerifyLoginOtp", "Account");
             }
+        }
+
+        [HttpGet]
+        public ActionResult VerifyLoginOtp()
+        {
+            if (Session["PendingLoginAccountID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            ViewBag.Email = Session["PendingLoginEmail"];
+            return View(new VerifyOtpViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult VerifyLoginOtp(VerifyOtpViewModel model)
+        {
+            if (Session["PendingLoginAccountID"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            ViewBag.Email = Session["PendingLoginEmail"];
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var expireAt = Session["LoginOtpExpireAt"] as DateTime?;
+            if (!expireAt.HasValue || OtpHelper.IsOtpExpired(expireAt.Value))
+            {
+                ModelState.AddModelError("OtpCode", "Mã xác minh đã hết hạn.");
+                return View(model);
+            }
+
+            var otpCode = Session["LoginOtpCode"] == null ? string.Empty : Session["LoginOtpCode"].ToString();
+            if (model.OtpCode != otpCode)
+            {
+                ModelState.AddModelError("OtpCode", "Mã xác minh không đúng.");
+                return View(model);
+            }
+
+            Session["AccountID"] = Session["PendingLoginAccountID"];
+            Session["Email"] = Session["PendingLoginEmail"];
+            Session["Role"] = Session["PendingLoginRole"];
+            Session["Avatar"] = Session["PendingLoginAvatar"];
+            Session["FullName"] = Session["PendingLoginFullName"];
+
+            ClearPendingLoginOtp();
+            TempData["Success"] = "Đăng nhập thành công.";
+            return RedirectToAction("Index", "Home");
+        }
+
+        public ActionResult ResendLoginOtp()
+        {
+            if (Session["PendingLoginAccountID"] == null || Session["PendingLoginEmail"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!CanResendOtp("LoginOtpLastSentAt"))
+            {
+                TempData["Error"] = "Vui lòng chờ 60 giây trước khi gửi lại mã.";
+                return RedirectToAction("VerifyLoginOtp", "Account");
+            }
+
+            var email = Session["PendingLoginEmail"].ToString();
+            var otpCode = OtpHelper.GenerateOtpCode();
+            var emailBody = "Xin chào " + email + ",\n"
+                + "Mã xác minh đăng nhập của bạn là: " + otpCode + "\n"
+                + "Mã này có hiệu lực trong 5 phút.\n"
+                + "Nếu bạn không thực hiện đăng nhập, vui lòng bỏ qua email.";
+
+            string emailError;
+            if (!EmailHelper.SendOtpEmail(email, "[LanguageCenter] Mã xác minh đăng nhập", emailBody, out emailError))
+            {
+                TempData["Error"] = "Không gửi được mã xác minh. Vui lòng thử lại sau.";
+                return RedirectToAction("VerifyLoginOtp", "Account");
+            }
+
+            Session["LoginOtpCode"] = otpCode;
+            Session["LoginOtpExpireAt"] = OtpHelper.GetExpireTime();
+            Session["LoginOtpLastSentAt"] = DateTime.Now;
+            TempData["Success"] = "Mã xác minh mới đã được gửi.";
+            return RedirectToAction("VerifyLoginOtp", "Account");
         }
 
         [HttpGet]
         public ActionResult Register()
         {
-            GenerateRegisterCaptcha();
             return View(new RegisterViewModel());
         }
 
@@ -115,23 +224,9 @@ namespace LanguageCenter.Controllers
                 ModelState.AddModelError("Password", passwordError);
             }
 
-            var currentCaptcha = Session["RegisterCaptcha"] == null
-                ? string.Empty
-                : Session["RegisterCaptcha"].ToString();
-
-            if (string.IsNullOrWhiteSpace(model.CaptchaCode))
-            {
-                ModelState.AddModelError("CaptchaCode", "Vui lòng nhập mã xác nhận.");
-            }
-            else if (model.CaptchaCode.Trim() != currentCaptcha)
-            {
-                ModelState.AddModelError("CaptchaCode", "Mã xác nhận không đúng.");
-            }
-
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Vui lòng nhập đầy đủ thông tin đăng ký.";
-                GenerateRegisterCaptcha();
                 return View(model);
             }
 
@@ -144,14 +239,95 @@ namespace LanguageCenter.Controllers
                 {
                     ModelState.AddModelError("Email", "Email này đã được sử dụng.");
                     TempData["Error"] = "Email này đã được sử dụng.";
-                    GenerateRegisterCaptcha();
                     return View(model);
+                }
+            }
+
+            var otpCode = OtpHelper.GenerateOtpCode();
+            var registerEmailBody = "Xin chào,\n"
+                + "Mã xác minh đăng ký tài khoản của bạn là: " + otpCode + "\n"
+                + "Mã này có hiệu lực trong 5 phút.\n"
+                + "Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.";
+
+            string emailError;
+            if (!EmailHelper.SendOtpEmail(
+                (model.Email ?? string.Empty).Trim(),
+                "[LanguageCenter] Mã xác minh đăng ký tài khoản",
+                registerEmailBody,
+                out emailError))
+            {
+                TempData["Error"] = "Không gửi được mã xác minh. Vui lòng thử lại sau.";
+                return View(model);
+            }
+
+            ClearPendingRegisterOtp();
+            Session["PendingRegisterModel"] = model;
+            Session["RegisterOtpCode"] = otpCode;
+            Session["RegisterOtpExpireAt"] = OtpHelper.GetExpireTime();
+            Session["RegisterOtpLastSentAt"] = DateTime.Now;
+
+            TempData["Success"] = "Mã xác minh đã được gửi đến email của bạn.";
+            return RedirectToAction("VerifyRegisterOtp", "Account");
+        }
+
+        [HttpGet]
+        public ActionResult VerifyRegisterOtp()
+        {
+            var pendingModel = Session["PendingRegisterModel"] as RegisterViewModel;
+            if (pendingModel == null)
+            {
+                return RedirectToAction("Register", "Account");
+            }
+
+            ViewBag.Email = pendingModel.Email;
+            return View(new VerifyOtpViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult VerifyRegisterOtp(VerifyOtpViewModel model)
+        {
+            var pendingModel = Session["PendingRegisterModel"] as RegisterViewModel;
+            if (pendingModel == null)
+            {
+                return RedirectToAction("Register", "Account");
+            }
+
+            ViewBag.Email = pendingModel.Email;
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var expireAt = Session["RegisterOtpExpireAt"] as DateTime?;
+            if (!expireAt.HasValue || OtpHelper.IsOtpExpired(expireAt.Value))
+            {
+                ModelState.AddModelError("OtpCode", "Mã xác minh đã hết hạn.");
+                return View(model);
+            }
+
+            var otpCode = Session["RegisterOtpCode"] == null ? string.Empty : Session["RegisterOtpCode"].ToString();
+            if (model.OtpCode != otpCode)
+            {
+                ModelState.AddModelError("OtpCode", "Mã xác minh không đúng.");
+                return View(model);
+            }
+
+            using (var db = new LanguageCenterDataContext(connectionString))
+            {
+                var email = (pendingModel.Email ?? string.Empty).Trim();
+                if (db.USER_ACCOUNTs.Any(x => x.Email == email))
+                {
+                    ClearPendingRegisterOtp();
+                    TempData["Error"] = "Email này đã được sử dụng.";
+                    return RedirectToAction("Register", "Account");
                 }
 
                 var account = new USER_ACCOUNT
                 {
                     Email = email,
-                    PasswordHash = PasswordHelper.HashPassword(model.Password),
+                    PasswordHash = PasswordHelper.HashPassword(pendingModel.Password),
                     Role = "Student",
                     Avatar = null,
                     IsActive = true,
@@ -161,9 +337,9 @@ namespace LanguageCenter.Controllers
 
                 var student = new STUDENT
                 {
-                    FullName = (model.FullName ?? string.Empty).Trim(),
+                    FullName = (pendingModel.FullName ?? string.Empty).Trim(),
                     DateOfBirth = null,
-                    PhoneNumber = (model.PhoneNumber ?? string.Empty).Trim(),
+                    PhoneNumber = (pendingModel.PhoneNumber ?? string.Empty).Trim(),
                     USER_ACCOUNT = account
                 };
 
@@ -172,9 +348,47 @@ namespace LanguageCenter.Controllers
                 db.SubmitChanges();
             }
 
-            Session.Remove("RegisterCaptcha");
+            ClearPendingRegisterOtp();
             TempData["Success"] = "Đăng ký thành công. Vui lòng đăng nhập.";
-            return RedirectToAction("Login");
+            return RedirectToAction("Login", "Account");
+        }
+
+        public ActionResult ResendRegisterOtp()
+        {
+            var pendingModel = Session["PendingRegisterModel"] as RegisterViewModel;
+            if (pendingModel == null)
+            {
+                return RedirectToAction("Register", "Account");
+            }
+
+            if (!CanResendOtp("RegisterOtpLastSentAt"))
+            {
+                TempData["Error"] = "Vui lòng chờ 60 giây trước khi gửi lại mã.";
+                return RedirectToAction("VerifyRegisterOtp", "Account");
+            }
+
+            var otpCode = OtpHelper.GenerateOtpCode();
+            var registerEmailBody = "Xin chào,\n"
+                + "Mã xác minh đăng ký tài khoản của bạn là: " + otpCode + "\n"
+                + "Mã này có hiệu lực trong 5 phút.\n"
+                + "Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.";
+
+            string emailError;
+            if (!EmailHelper.SendOtpEmail(
+                (pendingModel.Email ?? string.Empty).Trim(),
+                "[LanguageCenter] Mã xác minh đăng ký tài khoản",
+                registerEmailBody,
+                out emailError))
+            {
+                TempData["Error"] = "Không gửi được mã xác minh. Vui lòng thử lại sau.";
+                return RedirectToAction("VerifyRegisterOtp", "Account");
+            }
+
+            Session["RegisterOtpCode"] = otpCode;
+            Session["RegisterOtpExpireAt"] = OtpHelper.GetExpireTime();
+            Session["RegisterOtpLastSentAt"] = DateTime.Now;
+            TempData["Success"] = "Mã xác minh mới đã được gửi.";
+            return RedirectToAction("VerifyRegisterOtp", "Account");
         }
 
         [HttpGet]
@@ -268,6 +482,41 @@ namespace LanguageCenter.Controllers
         {
             Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+
+        private static void SetLoginSession(LanguageCenterDataContext db, USER_ACCOUNT account)
+        {
+            System.Web.HttpContext.Current.Session["AccountID"] = account.AccountID;
+            System.Web.HttpContext.Current.Session["Email"] = account.Email;
+            System.Web.HttpContext.Current.Session["Role"] = account.Role;
+            System.Web.HttpContext.Current.Session["FullName"] = GetFullName(db, account);
+            System.Web.HttpContext.Current.Session["Avatar"] = account.Avatar;
+        }
+
+        private void ClearPendingLoginOtp()
+        {
+            Session.Remove("PendingLoginAccountID");
+            Session.Remove("PendingLoginEmail");
+            Session.Remove("PendingLoginRole");
+            Session.Remove("PendingLoginAvatar");
+            Session.Remove("PendingLoginFullName");
+            Session.Remove("LoginOtpCode");
+            Session.Remove("LoginOtpExpireAt");
+            Session.Remove("LoginOtpLastSentAt");
+        }
+
+        private void ClearPendingRegisterOtp()
+        {
+            Session.Remove("PendingRegisterModel");
+            Session.Remove("RegisterOtpCode");
+            Session.Remove("RegisterOtpExpireAt");
+            Session.Remove("RegisterOtpLastSentAt");
+        }
+
+        private bool CanResendOtp(string sessionKey)
+        {
+            var lastSentAt = Session[sessionKey] as DateTime?;
+            return !lastSentAt.HasValue || DateTime.Now.Subtract(lastSentAt.Value).TotalSeconds >= 60;
         }
 
         private void GenerateRegisterCaptcha()
